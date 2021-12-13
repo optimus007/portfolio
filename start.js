@@ -1,0 +1,212 @@
+import * as THREE from './build/three.module.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from './jsm/loaders/RGBELoader.js';
+import { Reflector } from './jsm/objects/Reflector.js';
+import { AssetManager } from './AssetManager.js';
+import Stats from './jsm/libs/stats.module.js';
+import { GuiManager } from './GuiManager.js';
+import { TransformControls } from './jsm/controls/TransformControls.js'
+let guiManager = new GuiManager()
+let gui = guiManager.gui
+let transformControls
+const assetManager = new AssetManager()
+const assetList = assetManager.getAssetList()
+
+let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
+const clock = new THREE.Clock()
+const container = document.getElementById('content3d')
+
+const params = {
+    assetsPrint: () => { assetManager.printAssets() },
+
+}
+
+const addGui = () => {
+    gui.add(params, 'assetsPrint')
+
+}
+
+const init = () => {
+
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.VSMShadowMap;
+
+    stats = new Stats();
+    document.body.appendChild(stats.dom);
+
+    document.body.appendChild(container);
+    container.appendChild(renderer.domElement);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1, 5)
+    controls = new OrbitControls(camera, renderer.domElement)
+    transformControls = new TransformControls(camera, renderer.domElement)
+
+    transformControls.addEventListener('dragging-changed', (event) => {
+
+        controls.enabled = !event.value;
+
+    });
+
+    scene.add(transformControls)
+
+    addGui()
+    fillScene()
+    addEnvironment()
+    addLights()
+
+    addModel()
+    animate();
+}
+
+const addEnvironment = () => {
+    new RGBELoader()
+
+        .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr', function (texture) {
+
+            texture.mapping = THREE.EquirectangularReflectionMapping;
+            texture.type = THREE.HalfFloatType
+            scene.background = texture;
+            scene.environment = texture;
+        })
+
+
+
+}
+
+const fillScene = async () => {
+    const floorTextures = await assetManager.getTextureSet(assetList.Tiled_Floor_001)
+    console.log(floorTextures)
+    let geometry = new THREE.PlaneGeometry(10, 10);
+    geometry.rotateX(- Math.PI / 2);
+    let verticalMirror = new Reflector(geometry, {
+        clipBias: 0.003,
+        textureWidth: 500,
+        textureHeight: 500,
+        color: 0x889999
+    });
+    let material = new THREE.MeshPhysicalMaterial()
+    material.map = floorTextures.diffuse
+    material.aoMap = floorTextures.arm
+    material.roughnessMap = floorTextures.arm
+    material.roughness = 1
+    material.metalnessMap = floorTextures.arm
+    material.metalness = 1
+    material.normalMap = floorTextures.normal
+    // material.blending = THREE.AdditiveBlending
+    // material.transparent = true
+    material.opacity = 0.5
+    const texturedFloor = new THREE.Mesh(geometry, material)
+    texturedFloor.position.y = 0
+    console.log(material)
+    // scene.add(verticalMirror);
+    scene.add(texturedFloor);
+    // texturedFloor.castShadow = true
+    texturedFloor.receiveShadow = true
+    guiManager.mesh(texturedFloor, { positions: true })
+
+}
+
+const addModel = () => {
+
+    const loader = new GLTFLoader()
+    loader.load('./asset3d/model.glb', function (gltf) {
+
+        const model = gltf.scene
+        scene.add(model);
+        mixer = new THREE.AnimationMixer(model)
+
+        updateArray.push(
+            mixerUpdate
+        )
+
+        const animations = gltf.animations;
+
+
+        let idleAction = mixer.clipAction(animations[0]);
+
+        idleAction.play()
+        skeleton = new THREE.SkeletonHelper(model);
+
+        scene.add(skeleton);
+        model.traverse((node) => {
+            // console.log(node)
+            if (node.isMesh) {
+                console.log(node.material)
+                node.castShadow = true
+                node.receiveShadow = true
+            }
+        })
+
+
+
+    });
+}
+
+const addLights = () => {
+    const light = new THREE.SpotLight()
+    light.position.set(0, 5, -1)
+    light.target.position.set(0, 0, 0);
+
+    const lightLper = new THREE.SpotLightHelper(light)
+    const camH = new THREE.CameraHelper(light.shadow.camera)
+    light.castShadow = true;
+    light.shadow.camera.near = 0.1;
+    light.shadow.camera.far = 10;
+    light.shadow.bias = -0.01;
+
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
+    light.shadow.radius = 4
+    light.shadow.blurSamples = 8
+
+    light.shadow.camera.right = 2;
+    light.shadow.camera.left = - 2;
+    light.shadow.camera.top = 2;
+    light.shadow.camera.bottom = - 2;
+    scene.add(light)
+    scene.add(lightLper)
+    scene.add(camH)
+    transformControls.attach(light)
+    gui.add(light.shadow, 'bias', -0.05, 0.05)
+    gui.add(light.shadow, 'radius', 0, 15)
+    gui.add(light.shadow, 'blurSamples', 1, 16, 1)
+
+}
+
+const mixerUpdate = () => {
+    mixer.update(delta)
+}
+
+const animate = () => {
+    requestAnimationFrame(animate);
+    stats.update()
+    delta = clock.getDelta()
+
+    // if (mixer) {
+    //     mixer.update(delta)
+    // }
+
+    for (const f of updateArray) {
+        f()
+    }
+    // if (cubeCamera1) {
+    //     cubeCamera1.update(renderer, scene);
+    //     // material.envMap = cubeRenderTarget1.texture;
+
+    // }
+    renderer.render(scene, camera);
+}
+
+
+
+
+init()
