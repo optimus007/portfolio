@@ -1,4 +1,4 @@
-import { GUI } from "./jsm/libs/lil-gui.module.min.js"
+import { GUI } from "./examples/jsm/libs/lil-gui.module.min.js"
 
 
 export class GuiManager {

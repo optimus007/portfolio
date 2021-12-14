@@ -1,12 +1,13 @@
 import * as THREE from './build/three.module.js';
-import { OrbitControls } from './jsm/controls/OrbitControls.js';
-import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from './jsm/loaders/RGBELoader.js';
-import { Reflector } from './jsm/objects/Reflector.js';
+import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
+import { RGBELoader } from './examples/jsm/loaders/RGBELoader.js';
+import { Reflector } from './examples/jsm/objects/Reflector.js';
 import { AssetManager } from './AssetManager.js';
-import Stats from './jsm/libs/stats.module.js';
+import Stats from './examples/jsm/libs/stats.module.js';
 import { GuiManager } from './GuiManager.js';
-import { TransformControls } from './jsm/controls/TransformControls.js'
+import { TransformControls } from './examples/jsm/controls/TransformControls.js'
+console.log('three loaded')
 let guiManager = new GuiManager()
 let gui = guiManager.gui
 let transformControls
