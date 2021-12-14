@@ -1,0 +1,25 @@
+body {
+  position: fixed;
+  margin: 0;
+  background-color: #000;
+  color: #fff;
+  font-family: Monospace;
+  font-size: 13px;
+  line-height: 24px;
+  overscroll-behavior: none;
+}
+
+.lil-gui {
+  z-index: 2 !important; /* TODO Solve this in HTML */
+}
+
+@media all and (max-width: 640px) {
+  .lil-gui.root {
+    right: auto;
+    top: auto;
+    max-height: 50%;
+    max-width: 80%;
+    bottom: 0;
+    left: 0;
+  }
+}

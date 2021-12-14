@@ -7,11 +7,31 @@ import { AssetManager } from './AssetManager.js';
 import Stats from './examples/jsm/libs/stats.module.js';
 import { GuiManager } from './GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
-console.log('three loaded')
+const manager = new THREE.LoadingManager();
+
+manager.onLoad = function () {
+
+    console.log('Loading complete!');
+
+};
+
+
+manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    params.progress = itemsLoaded / itemsTotal
+    console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+
+};
+
+manager.onError = function (url) {
+
+    console.log('There was an error loading ' + url);
+
+};
+
 let guiManager = new GuiManager()
 let gui = guiManager.gui
 let transformControls
-const assetManager = new AssetManager()
+const assetManager = new AssetManager(manager)
 const assetList = assetManager.getAssetList()
 
 let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
@@ -20,12 +40,12 @@ const container = document.getElementById('content3d')
 
 const params = {
     assetsPrint: () => { assetManager.printAssets() },
-
+    progress: 0
 }
 
 const addGui = () => {
     gui.add(params, 'assetsPrint')
-
+    gui.add(params, 'progress', 0, 1).listen()
 }
 
 const init = () => {
@@ -66,10 +86,11 @@ const init = () => {
 
     addModel()
     animate();
+    window.addEventListener('resize', onWindowResize);
 }
 
 const addEnvironment = () => {
-    new RGBELoader()
+    new RGBELoader(manager)
 
         .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr', function (texture) {
 
@@ -84,8 +105,7 @@ const addEnvironment = () => {
 }
 
 const fillScene = async () => {
-    const floorTextures = await assetManager.getTextureSet(assetList.Tiled_Floor_001)
-    console.log(floorTextures)
+    const floorTextures = await assetManager.getTextureSet(assetList.Tiled_Floor_001, (v) => { console.log(v) })
     let geometry = new THREE.PlaneGeometry(10, 10);
     geometry.rotateX(- Math.PI / 2);
     let verticalMirror = new Reflector(geometry, {
@@ -107,7 +127,6 @@ const fillScene = async () => {
     material.opacity = 0.5
     const texturedFloor = new THREE.Mesh(geometry, material)
     texturedFloor.position.y = 0
-    console.log(material)
     // scene.add(verticalMirror);
     scene.add(texturedFloor);
     // texturedFloor.castShadow = true
@@ -118,7 +137,7 @@ const fillScene = async () => {
 
 const addModel = () => {
 
-    const loader = new GLTFLoader()
+    const loader = new GLTFLoader(manager)
     loader.load('./asset3d/model.glb', function (gltf) {
 
         const model = gltf.scene
@@ -139,9 +158,8 @@ const addModel = () => {
 
         scene.add(skeleton);
         model.traverse((node) => {
-            // console.log(node)
             if (node.isMesh) {
-                console.log(node.material)
+                // console.log(node.material)
                 node.castShadow = true
                 node.receiveShadow = true
             }
@@ -173,13 +191,17 @@ const addLights = () => {
     light.shadow.camera.left = - 2;
     light.shadow.camera.top = 2;
     light.shadow.camera.bottom = - 2;
+    light.shadow.camera.updateProjectionMatrix()
     scene.add(light)
     scene.add(lightLper)
     scene.add(camH)
     transformControls.attach(light)
+
     gui.add(light.shadow, 'bias', -0.05, 0.05)
     gui.add(light.shadow, 'radius', 0, 15)
     gui.add(light.shadow, 'blurSamples', 1, 16, 1)
+    gui.add(light.shadow.camera, 'near', 0, 16, 1)
+    gui.add(light.shadow.camera, 'far', 1, 16, 1)
 
 }
 
@@ -207,6 +229,15 @@ const animate = () => {
     renderer.render(scene, camera);
 }
 
+function onWindowResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+
+}
 
 
 

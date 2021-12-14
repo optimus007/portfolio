@@ -1,6 +1,6 @@
 import * as THREE from './build/three.module.js';
 
-const textureLoader = new THREE.TextureLoader()
+let textureLoader
 
 const assets = {}
 
@@ -22,8 +22,9 @@ const urlLibrary = {
 }
 
 class AssetManager {
-    constructor() {
+    constructor(manager) {
 
+        textureLoader = new THREE.TextureLoader(manager)
     }
     getAssetList() {
         return assetList
@@ -32,6 +33,7 @@ class AssetManager {
     printAssets() {
         console.log({ assets })
     }
+
 
     async getTextureSet(name) {
         if (this.checkIfDownloaded(name)) {
@@ -49,7 +51,11 @@ class AssetManager {
         const urls = urlLibrary[name]
 
         for (const [texName, url] of Object.entries(urls)) {
+            console.log('loading', texName)
             assets[name][texName] = await textureLoader.loadAsync(url)
+            if (texName === 'diffuse') {
+                assets[name][texName].encoding = THREE.sRGBEncoding
+            }
             assets[name][texName].name = name + texName
         }
 
