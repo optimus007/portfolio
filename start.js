@@ -263,10 +263,10 @@ async function addText() {
     const tw = new TWEEN.Tween(obj)
     tw.to({ val: 1 }, 10000)
     tw.onUpdate(() => {
-        mesh.material.color.setHSL(obj.val, 0.5, 0.5)
+        mesh.material.color.setHSL(obj.val, 1, 0.5)
         mesh.position.y = obj.val - 0.5
 
-        mesh1.material.color.setHSL(obj.val, 0.5, 0.5)
+        mesh1.material.color.setHSL(obj.val, 1, 0.5)
         mesh1.position.y = 1 - obj.val - 0.5
 
     })
