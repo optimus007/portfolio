@@ -1,37 +1,19 @@
 import * as THREE from './build/three.module.js';
 import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from './examples/jsm/loaders/RGBELoader.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
-import { AssetManager } from './AssetManager.js';
+import { assetManager } from './custom/AssetManager.js';
 import Stats from './examples/jsm/libs/stats.module.js';
 import { GuiManager } from './GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
-const manager = new THREE.LoadingManager();
+import { getTextMesh } from './custom/MeshHandler.js';
+import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 
-manager.onLoad = function () {
-
-    console.log('Loading complete!');
-
-};
-
-
-manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-    params.progress = itemsLoaded / itemsTotal
-    console.log('Loading file: ' + url + '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
-
-};
-
-manager.onError = function (url) {
-
-    console.log('There was an error loading ' + url);
-
-};
 
 let guiManager = new GuiManager()
 let gui = guiManager.gui
 let transformControls
-const assetManager = new AssetManager(manager)
+
 const assetList = assetManager.getAssetList()
 
 let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
@@ -40,24 +22,29 @@ const container = document.getElementById('content3d')
 
 const params = {
     assetsPrint: () => { assetManager.printAssets() },
-    progress: 0
+    progress: 0,
+    renderData: ''
 }
 
+
+
 const addGui = () => {
-    gui.add(params, 'assetsPrint')
-    gui.add(params, 'progress', 0, 1).listen()
+    gui.add(params, 'renderData').listen().name('Resolution & pixel density')
+    // gui.add(params, 'assetsPrint')
+    // gui.add(params, 'progress', 0, 1).listen()
+
 }
 
 const init = () => {
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
     renderer.outputEncoding = THREE.sRGBEncoding;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.VSMShadowMap;
+    // renderer.shadowMap.enabled = true;
+    // renderer.shadowMap.type = THREE.VSMShadowMap;
 
     stats = new Stats();
     document.body.appendChild(stats.dom);
@@ -67,7 +54,7 @@ const init = () => {
 
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 1, 5)
+    camera.position.set(0, 0.1, 1)
     controls = new OrbitControls(camera, renderer.domElement)
     transformControls = new TransformControls(camera, renderer.domElement)
 
@@ -78,27 +65,31 @@ const init = () => {
     });
 
     scene.add(transformControls)
-
-    addGui()
-    fillScene()
-    addEnvironment()
-    addLights()
-
-    addModel()
     animate();
+
     window.addEventListener('resize', onWindowResize);
+    onWindowResize()
+    afterInit()
 }
 
-const addEnvironment = () => {
-    new RGBELoader(manager)
+const afterInit = () => {
+    addGui()
+    // fillScene()
+    // addEnvironment()
+    // addLights()
+    // addModel()
+    addText()
+}
 
-        .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr', function (texture) {
 
-            texture.mapping = THREE.EquirectangularReflectionMapping;
-            texture.type = THREE.HalfFloatType
-            scene.background = texture;
-            scene.environment = texture;
-        })
+const addEnvironment = async () => {
+    const texture = await assetManager.getHDRI(assetList.hdri)
+
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    texture.type = THREE.HalfFloatType
+    scene.background = texture;
+    scene.environment = texture;
+
 
 
 
@@ -212,6 +203,7 @@ const mixerUpdate = () => {
 const animate = () => {
     requestAnimationFrame(animate);
     stats.update()
+
     delta = clock.getDelta()
 
     // if (mixer) {
@@ -226,12 +218,30 @@ const animate = () => {
     //     // material.envMap = cubeRenderTarget1.texture;
 
     // }
+    TWEEN.update()
     renderer.render(scene, camera);
 }
 
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
+    const fov = 50;
+    const planeAspectRatio = 16 / 9;
+    params.renderData = `${window.innerWidth}x${window.innerHeight}, ${window.devicePixelRatio}`
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+
+
+    if (camera.aspect > planeAspectRatio) {
+        // window too large
+        camera.fov = fov;
+    } else {
+        // window too narrow
+        const cameraHeight = Math.tan(THREE.MathUtils.degToRad(fov / 2));
+        const ratio = camera.aspect / planeAspectRatio;
+        const newCameraHeight = cameraHeight / ratio;
+        camera.fov = THREE.MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2;
+    }
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -239,6 +249,26 @@ function onWindowResize() {
 
 }
 
+async function addText() {
+    const mesh = await getTextMesh('vishal')
+    const mesh1 = await getTextMesh('prime')
+    mesh1.rotateY(Math.PI)
+    scene.add(mesh)
+    scene.add(mesh1)
+    const obj = { val: 0 }
+    const tw = new TWEEN.Tween(obj)
+    tw.to({ val: 1 }, 10000)
+    tw.onUpdate(() => {
+        mesh.material.color.setHSL(obj.val, 0.5, 0.5)
+        mesh.position.y = obj.val - 0.5
 
+        mesh1.material.color.setHSL(obj.val, 0.5, 0.5)
+        mesh1.position.y = 1 - obj.val - 0.5
+
+    })
+    tw.yoyo(true)
+    tw.repeat(Infinity)
+    tw.start()
+}
 
 init()
