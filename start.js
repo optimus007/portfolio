@@ -56,6 +56,9 @@ const init = () => {
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 0.1, 1)
     controls = new OrbitControls(camera, renderer.domElement)
+    controls.enablePan = false
+    controls.minDistance = 0.5
+    controls.maxDistance = 5
     transformControls = new TransformControls(camera, renderer.domElement)
 
     transformControls.addEventListener('dragging-changed', (event) => {
