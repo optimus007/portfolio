@@ -29,7 +29,8 @@ const params = {
 
 
 const addGui = () => {
-    gui.add(params, 'renderData').listen().name('Resolution & pixel density')
+    gui.add(params, 'renderData').listen().name('Resolution')
+    gui.add(window, 'devicePixelRatio').listen().name('Pixel density')
     // gui.add(params, 'assetsPrint')
     // gui.add(params, 'progress', 0, 1).listen()
 
@@ -230,7 +231,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     const fov = 50;
     const planeAspectRatio = 16 / 9;
-    params.renderData = `${window.innerWidth}x${window.innerHeight}, ${window.devicePixelRatio}`
+    params.renderData = `${window.innerWidth}x${window.innerHeight}`
 
     camera.aspect = window.innerWidth / window.innerHeight;
 
