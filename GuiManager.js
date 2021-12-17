@@ -3,7 +3,7 @@ import { GUI } from "./examples/jsm/libs/lil-gui.module.min.js"
 
 export class GuiManager {
     constructor() {
-        this.gui = new GUI({ title: 'v1' })
+        this.gui = new GUI({ title: 'v2' })
 
     }
 

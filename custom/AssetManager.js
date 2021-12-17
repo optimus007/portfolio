@@ -2,6 +2,9 @@ import * as THREE from '../build/three.module.js';
 import { TTFLoader } from "../examples/jsm/loaders/TTFLoader.js"
 import { Font } from '../examples/jsm/loaders/FontLoader.js';
 import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
+import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
+import * as  TWEEN from '../examples/jsm/libs/tween.esm.js';
+
 const manager = new THREE.LoadingManager();
 
 
@@ -137,6 +140,48 @@ class AssetManager {
         assets[name] = hdri
 
     }
+}
+
+
+
+export class NoiseGenerator {
+    constructor(object, keyName, seed = Math.random()) {
+        this.perlin = new ImprovedNoise()
+        this.obj = { val: 0 }
+        this.v = 0
+        this.setup()
+        this.frequency = 0.0005
+        this.strength = 0.02
+        this.seed = seed
+        this.noiseValue = 0
+
+        this.targetObject = object
+        this.targetKey = keyName
+    }
+    setup() {
+        this.tween = new TWEEN.Tween(this.obj)
+        this.tween.to({ val: 1 }, 10000)
+        this.tween.repeat(Infinity)
+        this.tween.easing(TWEEN.Easing.Linear.None)
+        this.tween.onUpdate(() => {
+            this.time = performance.now()
+            this.noiseValue = this.perlin.noise(this.time * this.frequency, this.seed, this.seed) * this.strength
+
+            this.targetObject[this.targetKey] = this.noiseValue
+        })
+    }
+
+    start() {
+        this.tween.start()
+    }
+    end() {
+        this.tween.stop()
+    }
+    setFrequency(v) {
+        this.frequency = v
+    }
+
+
 }
 
 const assetManager = new AssetManager()

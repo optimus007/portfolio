@@ -12,10 +12,12 @@ let font
 export const getTextMesh = async (text, color = '#00ff00', size, height,) => {
     if (!font) { font = await assetManager.getFont(assets.ubuntu_font) }
 
-    const matLite = new THREE.MeshBasicMaterial({
+    const matLite = new THREE.MeshStandardMaterial({
         color: color,
         transparent: false,
         opacity: 1,
+        roughness: 0.1,
+        metalness: 1,
 
     });
 

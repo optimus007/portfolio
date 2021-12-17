@@ -2,7 +2,7 @@ import * as THREE from './build/three.module.js';
 import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
-import { assetManager } from './custom/AssetManager.js';
+import { assetManager, NoiseGenerator } from './custom/AssetManager.js';
 import Stats from './examples/jsm/libs/stats.module.js';
 import { GuiManager } from './GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
@@ -19,30 +19,32 @@ const assetList = assetManager.getAssetList()
 let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
-
+const renderResolution = new THREE.Vector2()
 const params = {
     assetsPrint: () => { assetManager.printAssets() },
-    progress: 0,
-    renderData: ''
+    pixelDensity: window.devicePixelRatio,
+
+
 }
 
 
 
 const addGui = () => {
-    gui.add(params, 'renderData').listen().name('Resolution')
-    gui.add(window, 'devicePixelRatio').listen().name('Pixel density')
-    // gui.add(params, 'assetsPrint')
-    // gui.add(params, 'progress', 0, 1).listen()
+    gui.add(params, 'pixelDensity', 0.2, window.devicePixelRatio).listen().name('Pixel density').onChange((v) => {
+        renderer.setPixelRatio(v)
+        renderer.getSize(renderResolution)
+
+        console.log()
+    })
 
 }
 
 const init = () => {
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    // renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
     renderer.outputEncoding = THREE.sRGBEncoding;
     // renderer.shadowMap.enabled = true;
     // renderer.shadowMap.type = THREE.VSMShadowMap;
@@ -79,10 +81,18 @@ const init = () => {
 const afterInit = () => {
     addGui()
     // fillScene()
-    // addEnvironment()
+    addEnvironment()
     // addLights()
     // addModel()
     addText()
+    addGrid()
+
+    const camXNoise = new NoiseGenerator(controls.target, 'x', 1)
+    const camYNoise = new NoiseGenerator(controls.target, 'y', 2)
+    const camZNoise = new NoiseGenerator(controls.target, 'z', 3)
+    camXNoise.start()
+    camYNoise.start()
+    camZNoise.start()
 }
 
 
@@ -91,7 +101,7 @@ const addEnvironment = async () => {
 
     texture.mapping = THREE.EquirectangularReflectionMapping;
     texture.type = THREE.HalfFloatType
-    scene.background = texture;
+    // scene.background = texture;
     scene.environment = texture;
 
 
@@ -223,6 +233,7 @@ const animate = () => {
 
     // }
     TWEEN.update()
+    controls.update()
     renderer.render(scene, camera);
 }
 
@@ -231,7 +242,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     const fov = 50;
     const planeAspectRatio = 16 / 9;
-    params.renderData = `${window.innerWidth}x${window.innerHeight}`
 
     camera.aspect = window.innerWidth / window.innerHeight;
 
@@ -254,8 +264,8 @@ function onWindowResize() {
 }
 
 async function addText() {
-    const mesh = await getTextMesh('vishal')
-    const mesh1 = await getTextMesh('prime')
+    const mesh = await getTextMesh('Vishal')
+    const mesh1 = await getTextMesh('Prime')
     mesh1.rotateY(Math.PI)
     scene.add(mesh)
     scene.add(mesh1)
@@ -264,15 +274,16 @@ async function addText() {
     tw.to({ val: 1 }, 10000)
     tw.onUpdate(() => {
         mesh.material.color.setHSL(obj.val, 1, 0.5)
-        mesh.position.y = obj.val - 0.5
-
         mesh1.material.color.setHSL(obj.val, 1, 0.5)
-        mesh1.position.y = 1 - obj.val - 0.5
-
     })
     tw.yoyo(true)
     tw.repeat(Infinity)
     tw.start()
+}
+
+function addGrid(params) {
+    const grid = new THREE.GridHelper(4, 4)
+    scene.add(grid)
 }
 
 init()
