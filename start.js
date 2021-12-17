@@ -103,7 +103,7 @@ const addEnvironment = async () => {
     texture.type = THREE.HalfFloatType
     // scene.background = texture;
     scene.environment = texture;
-
+    scene.background = new THREE.Color(0.5, 0.5, 0.5)
 
 
 
