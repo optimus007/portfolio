@@ -1,8 +1,7 @@
 import * as THREE from './build/three.module.js';
 import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from './examples/jsm/loaders/GLTFLoader.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
-import { assetManager, NoiseGenerator } from './custom/AssetManager.js';
+import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
 import Stats from './examples/jsm/libs/stats.module.js';
 import { GuiManager } from './GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
@@ -13,7 +12,7 @@ import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 let guiManager = new GuiManager()
 let gui = guiManager.gui
 let transformControls
-
+let camNoise
 const assetList = assetManager.getAssetList()
 
 let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
@@ -21,6 +20,7 @@ const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
 const renderResolution = new THREE.Vector2()
 const params = {
+    noiseIntensity: 0.5,
     assetsPrint: () => { assetManager.printAssets() },
     pixelDensity: window.devicePixelRatio,
 
@@ -30,11 +30,15 @@ const params = {
 
 
 const addGui = () => {
+
     gui.add(params, 'pixelDensity', 0.2, window.devicePixelRatio).listen().name('Pixel density').onChange((v) => {
         renderer.setPixelRatio(v)
         renderer.getSize(renderResolution)
 
-        console.log()
+    })
+
+    gui.add(params, 'noiseIntensity', 0, 2).name('Noise intensity').onChange((v) => {
+        camNoise.intensity = v
     })
 
 }
@@ -57,8 +61,11 @@ const init = () => {
 
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0.1, 1)
+    camera.position.set(0, 3, 3)
+
     controls = new OrbitControls(camera, renderer.domElement)
+    controls.target.set(0, 1.5, 0)
+    controls.update()
     controls.enablePan = false
     controls.minDistance = 0.5
     controls.maxDistance = 5
@@ -83,16 +90,26 @@ const afterInit = () => {
     // fillScene()
     addEnvironment()
     // addLights()
-    // addModel()
+    addModel()
     addText()
     addGrid()
 
-    const camXNoise = new NoiseGenerator(controls.target, 'x', 1)
-    const camYNoise = new NoiseGenerator(controls.target, 'y', 2)
-    const camZNoise = new NoiseGenerator(controls.target, 'z', 3)
-    camXNoise.start()
-    camYNoise.start()
-    camZNoise.start()
+
+    camNoise = new cameraNoise(camera)
+    camNoise.start()
+    controls.addEventListener('start', () => {
+
+        camNoise.stop()
+    })
+
+    controls.addEventListener('end', () => {
+        controls.update()
+
+        camNoise.start()
+
+    })
+
+
 }
 
 
@@ -140,13 +157,13 @@ const fillScene = async () => {
 
 }
 
-const addModel = () => {
+const addModel = async () => {
 
-    const loader = new GLTFLoader(manager)
-    loader.load('./asset3d/model.glb', function (gltf) {
-
-        const model = gltf.scene
-        scene.add(model);
+    const gltf = await assetManager.loadGLTF(assetList.model)
+    const model = gltf.scene
+    scene.add(model);
+    console.log(gltf)
+    if (gltf.animations.length) {
         mixer = new THREE.AnimationMixer(model)
 
         updateArray.push(
@@ -162,17 +179,18 @@ const addModel = () => {
         skeleton = new THREE.SkeletonHelper(model);
 
         scene.add(skeleton);
-        model.traverse((node) => {
-            if (node.isMesh) {
-                // console.log(node.material)
-                node.castShadow = true
-                node.receiveShadow = true
-            }
-        })
+    }
+    model.traverse((node) => {
+        if (node.isMesh) {
+            // console.log(node.material)
+            node.castShadow = true
+            node.receiveShadow = true
+        }
+    })
 
 
 
-    });
+
 }
 
 const addLights = () => {
@@ -232,8 +250,9 @@ const animate = () => {
     //     // material.envMap = cubeRenderTarget1.texture;
 
     // }
+
     TWEEN.update()
-    controls.update()
+    // controls.update()
     renderer.render(scene, camera);
 }
 
@@ -267,6 +286,8 @@ async function addText() {
     const mesh = await getTextMesh('Vishal')
     const mesh1 = await getTextMesh('Prime')
     mesh1.rotateY(Math.PI)
+    mesh.translateZ(1)
+    mesh1.translateZ(1)
     scene.add(mesh)
     scene.add(mesh1)
     const obj = { val: 0 }

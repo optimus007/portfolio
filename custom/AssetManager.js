@@ -4,6 +4,7 @@ import { Font } from '../examples/jsm/loaders/FontLoader.js';
 import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
 import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
 import * as  TWEEN from '../examples/jsm/libs/tween.esm.js';
+import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
 
 const manager = new THREE.LoadingManager();
 
@@ -32,6 +33,7 @@ let textureLoader = new THREE.TextureLoader(manager)
 let fileLoader = new THREE.FileLoader(manager)
 let ttfLoader = new TTFLoader(manager)
 let rgbeLoader = new RGBELoader(manager)
+let gltfLoader = new GLTFLoader(manager)
 
 const assets = {}
 
@@ -44,11 +46,14 @@ const assetList = {
     Tiled_Floor_001: 'tile_floor',
     ubuntu_font: 'ubuntu',
     kenpixel: 'keen',
-    hdri: 'hdri'
+    hdri: 'hdri',
+    model: 'model'
 }
 
 const urlLibrary = {
 
+
+    [assetList.model]: './asset3d/model.glb',
     [assetList.Tiled_Floor_001]: {
         arm: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
         diffuse: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
@@ -140,6 +145,10 @@ class AssetManager {
         assets[name] = hdri
 
     }
+
+    async loadGLTF(name) {
+        return await gltfLoader.loadAsync(urlLibrary[name])
+    }
 }
 
 
@@ -167,6 +176,10 @@ export class NoiseGenerator {
             this.time = performance.now()
             this.noiseValue = this.perlin.noise(this.time * this.frequency, this.seed, this.seed) * this.strength
 
+            const shake = Math.pow(intensityRef.current, 2)
+
+
+
             this.targetObject[this.targetKey] = this.noiseValue
         })
     }
@@ -174,11 +187,69 @@ export class NoiseGenerator {
     start() {
         this.tween.start()
     }
-    end() {
+    stop() {
         this.tween.stop()
     }
     setFrequency(v) {
         this.frequency = v
+    }
+
+
+}
+
+export class cameraNoise {
+    constructor(camera) {
+        this.camera = camera
+        this.intensity = 0.5
+        this.decay
+        this.decayRate = 0.65
+        this.maxYaw = 0.1
+        this.maxPitch = 0.1
+        this.maxRoll = 0.1
+        this.yawFrequency = 0.001
+        this.pitchFrequency = 0.001
+        this.rollFrequency = 0.001
+        this.controls
+
+        this.obj = { val: 0 }
+        this.yawNoise = new ImprovedNoise()
+        this.pitchNoise = new ImprovedNoise()
+        this.rollNoise = new ImprovedNoise()
+        this.initialRotation = new THREE.Euler()
+        this.setup()
+    }
+    copyRotation() {
+        this.initialRotation.copy(this.camera.rotation)
+    }
+
+
+    setup() {
+
+        this.tween = new TWEEN.Tween(this.obj)
+        this.tween.to({ val: 1 }, 10000)
+        this.tween.repeat(Infinity)
+        this.tween.easing(TWEEN.Easing.Linear.None)
+        this.tween.onStart(() => { this.copyRotation() })
+        this.tween.onUpdate(() => {
+            this.time = performance.now()
+            const shake = Math.pow(this.intensity, 2)
+            const yaw = this.maxYaw * shake * this.yawNoise.noise(this.time * this.yawFrequency, 1, 100)
+            const pitch = this.maxPitch * shake * this.pitchNoise.noise(this.time * this.pitchFrequency, 1, 200)
+            const roll = this.maxRoll * shake * this.rollNoise.noise(this.time * this.rollFrequency, 1, 300)
+
+            this.camera.rotation.set(
+                this.initialRotation.x + pitch,
+                this.initialRotation.y + yaw,
+                this.initialRotation.z + roll
+            )
+        })
+
+    }
+    start() {
+        this.tween.start()
+    }
+    stop() {
+        this.tween.stop()
     }
 
 
