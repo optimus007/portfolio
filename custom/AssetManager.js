@@ -47,13 +47,15 @@ const assetList = {
     ubuntu_font: 'ubuntu',
     kenpixel: 'keen',
     hdri: 'hdri',
-    model: 'model'
+    model: 'model',
+    robot: 'robot',
 }
 
 const urlLibrary = {
 
 
     [assetList.model]: './asset3d/model.glb',
+    [assetList.robot]: './asset3d/robot.glb',
     [assetList.Tiled_Floor_001]: {
         arm: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
         diffuse: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),

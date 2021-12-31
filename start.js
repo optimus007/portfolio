@@ -93,7 +93,7 @@ const afterInit = () => {
     addModel()
     addText()
     addGrid()
-
+    addAR()
 
     camNoise = new cameraNoise(camera)
     camNoise.start()
@@ -162,7 +162,9 @@ const addModel = async () => {
     const gltf = await assetManager.loadGLTF(assetList.model)
     const model = gltf.scene
     scene.add(model);
-    console.log(gltf)
+    const materials = {}
+    console.log({ gltf })
+
     if (gltf.animations.length) {
         mixer = new THREE.AnimationMixer(model)
 
@@ -185,11 +187,41 @@ const addModel = async () => {
             // console.log(node.material)
             node.castShadow = true
             node.receiveShadow = true
+            materials[node.material.name] = node.material
         }
     })
+    console.log(materials)
 
 
 
+}
+
+const addAR = async () => {
+
+    const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
+    const mode = 'ar_preferred'
+    const link = 'www.google.com'
+    const title = 'vishal_prime'
+    const aTag = document.createElement('a')
+    aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`
+
+
+
+    const arActions = {
+        sceneViewer: () => {
+            // Check whether this is an Android device.
+            const isAndroid = /android/i.test(navigator.userAgent);
+
+            if (isAndroid) {
+                window.open(aTag)
+            } else {
+                alert("not android")
+
+            }
+
+        }
+    }
+    guiManager.add(arActions, 'sceneViewer')
 
 }
 
@@ -306,5 +338,7 @@ function addGrid(params) {
     const grid = new THREE.GridHelper(4, 4)
     scene.add(grid)
 }
+
+
 
 init()
