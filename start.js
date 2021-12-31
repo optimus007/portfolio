@@ -199,11 +199,12 @@ const addModel = async () => {
 const addAR = async () => {
 
     const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
-    const mode = 'ar_preferred'
+    const mode = '3d_preferred'
     const link = 'www.google.com'
     const title = 'vishal_prime'
+    const vertical = true
     const aTag = document.createElement('a')
-    aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`
+    aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}&enable_vertical_placement=${vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
 
 
 
