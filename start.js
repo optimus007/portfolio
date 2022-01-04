@@ -27,7 +27,51 @@ const params = {
 
 }
 
+const tweens = {
+    intro: null,
+    introVal: 0,
 
+    hdri: {
+        delay: 3000,
+        tw: null,
+        duration: 10000,
+        val: 0,
+        easing: TWEEN.Easing.Quadratic.Out,
+
+        hexA: '#000000',
+        hexB: '#808080',
+
+        intA: 0,
+        intB: 1,
+    }
+}
+
+
+const colA = new THREE.Color()
+const colB = new THREE.Color()
+const colC = new THREE.Color()
+
+
+const colorLerp = (hexA, hexB, lerpValue) => {
+    return colC.lerpColors(colA.set(hexA), colB.set(hexB), lerpValue)
+}
+
+const initTweens = () => {
+    const hdriDat = tweens.hdri
+    hdriDat.tw = new TWEEN.Tween(hdriDat).to({ val: 1 }, hdriDat.duration)
+    hdriDat.tw.delay(hdriDat.delay)
+    hdriDat.tw.easing(hdriDat.easing)
+    hdriDat.tw.onUpdate(() => {
+        scene.background.copy(colorLerp(hdriDat.hexA, hdriDat.hexB, hdriDat.val))
+
+        const int = THREE.MathUtils.lerp(hdriDat.intA, hdriDat.intB, hdriDat.val)
+        scene.traverseVisible((node) => {
+            if (node.material && node.material.isMeshStandardMaterial) {
+                node.material.envMapIntensity = int
+            }
+        })
+    })
+}
 
 const addGui = () => {
 
@@ -60,6 +104,7 @@ const init = () => {
     container.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0, 0, 0)
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 3, 3)
 
@@ -78,11 +123,15 @@ const init = () => {
     });
 
     scene.add(transformControls)
+
     animate();
 
     window.addEventListener('resize', onWindowResize);
     onWindowResize()
+    initTweens()
     afterInit()
+
+
 }
 
 const afterInit = () => {
@@ -120,9 +169,9 @@ const addEnvironment = async () => {
     texture.type = THREE.HalfFloatType
     // scene.background = texture;
     scene.environment = texture;
-    scene.background = new THREE.Color(0.5, 0.5, 0.5)
-
-
+    // scene.background = new THREE.Color(0.5, 0.5, 0.5)
+    // console.log(scene.background.getHexString())
+    tweens.hdri.tw.start()
 
 }
 
@@ -188,11 +237,10 @@ const addModel = async () => {
             node.castShadow = true
             node.receiveShadow = true
             materials[node.material.name] = node.material
+            node.material.envMapIntensity = 0
         }
     })
     console.log(materials)
-
-
 
 }
 
