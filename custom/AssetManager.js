@@ -1,7 +1,7 @@
 import * as THREE from '../build/three.module.js';
 import { TTFLoader } from "../examples/jsm/loaders/TTFLoader.js"
 import { Font } from '../examples/jsm/loaders/FontLoader.js';
-import { RGBELoader } from '../examples/jsm/loaders/RGBELoader.js';
+import { EXRLoader } from '../examples/jsm/loaders/EXRLoader.js';
 import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
 import * as  TWEEN from '../examples/jsm/libs/tween.esm.js';
 import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
@@ -32,7 +32,7 @@ manager.onError = function (url) {
 let textureLoader = new THREE.TextureLoader(manager)
 let fileLoader = new THREE.FileLoader(manager)
 let ttfLoader = new TTFLoader(manager)
-let rgbeLoader = new RGBELoader(manager)
+let exrLoader = new EXRLoader(manager)
 let gltfLoader = new GLTFLoader(manager)
 
 const assets = {}
@@ -63,7 +63,7 @@ const urlLibrary = {
     },
     [assetList.ubuntu_font]: './fonts/Ubuntu-Regular.ttf',
     [assetList.kenpixel]: './fonts/kenpixel.ttf',
-    [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_08_1k.hdr',
+    [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/photo_studio_loft_hall_1k.exr',
 
 }
 
@@ -72,7 +72,7 @@ const urlLibrary = {
 class AssetManager {
     constructor() {
         this.progress = 0
-
+        this.assetList = assetList
     }
     getAssetList() {
         return assetList
@@ -142,8 +142,9 @@ class AssetManager {
     }
 
     async loadHDRI(name) {
-        const hdri = await rgbeLoader.loadAsync(urlLibrary[name])
-
+        const hdri = await exrLoader.loadAsync(urlLibrary[name])
+        hdri.mapping = THREE.EquirectangularReflectionMapping
+        hdri.encoding = THREE.LinearEncoding
         assets[name] = hdri
 
     }

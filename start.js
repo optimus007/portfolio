@@ -3,22 +3,27 @@ import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
 import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
 import Stats from './examples/jsm/libs/stats.module.js';
-import { GuiManager } from './GuiManager.js';
+import { guiManager } from './custom/GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
 import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
+import { webXRController } from './custom/xr.js';
 
 
-let guiManager = new GuiManager()
+
 let gui = guiManager.gui
+const rendererSize = new THREE.Vector2(0, 0)
+let xr
 let transformControls
 let camNoise
 const assetList = assetManager.getAssetList()
 
 let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
+let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
 const renderResolution = new THREE.Vector2()
+
 const params = {
     noiseIntensity: 0.5,
     assetsPrint: () => { assetManager.printAssets() },
@@ -32,9 +37,9 @@ const tweens = {
     introVal: 0,
 
     hdri: {
-        delay: 3000,
+        delay: 1000,
         tw: null,
-        duration: 10000,
+        duration: 5000,
         val: 0,
         easing: TWEEN.Easing.Quadratic.Out,
 
@@ -89,9 +94,10 @@ const addGui = () => {
 
 const init = () => {
 
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0)
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputEncoding = THREE.sRGBEncoding;
     // renderer.shadowMap.enabled = true;
@@ -104,6 +110,8 @@ const init = () => {
     container.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
+    sceneGroup = new THREE.Group()
+    scene.add(sceneGroup)
     scene.background = new THREE.Color(0, 0, 0)
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 3, 3)
@@ -113,7 +121,7 @@ const init = () => {
     controls.update()
     controls.enablePan = false
     controls.minDistance = 0.5
-    controls.maxDistance = 5
+    controls.maxDistance = 10
     transformControls = new TransformControls(camera, renderer.domElement)
 
     transformControls.addEventListener('dragging-changed', (event) => {
@@ -126,15 +134,17 @@ const init = () => {
 
     animate();
 
-    window.addEventListener('resize', onWindowResize);
-    onWindowResize()
+    // window.addEventListener('resize', updateSize);
+    updateSize(true)
     initTweens()
     afterInit()
+
 
 
 }
 
 const afterInit = () => {
+    xr = new webXRController(renderer, render, sceneGroup)
     addGui()
     // fillScene()
     addEnvironment()
@@ -165,8 +175,6 @@ const afterInit = () => {
 const addEnvironment = async () => {
     const texture = await assetManager.getHDRI(assetList.hdri)
 
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    texture.type = THREE.HalfFloatType
     // scene.background = texture;
     scene.environment = texture;
     // scene.background = new THREE.Color(0.5, 0.5, 0.5)
@@ -210,7 +218,7 @@ const addModel = async () => {
 
     const gltf = await assetManager.loadGLTF(assetList.model)
     const model = gltf.scene
-    scene.add(model);
+    sceneGroup.add(model);
     const materials = {}
     console.log({ gltf })
 
@@ -264,13 +272,13 @@ const addAR = async () => {
             if (isAndroid) {
                 window.open(aTag)
             } else {
-                alert("not android")
+                alert('Sorry only available on android devices with arcore')
 
             }
 
         }
     }
-    guiManager.add(arActions, 'sceneViewer')
+    guiManager.arFolder.add(arActions, 'sceneViewer').name(" Google AR")
 
 }
 
@@ -314,7 +322,11 @@ const mixerUpdate = () => {
 }
 
 const animate = () => {
-    requestAnimationFrame(animate);
+    renderer.setAnimationLoop(render)
+}
+
+const render = () => {
+    updateSize()
     stats.update()
 
     delta = clock.getDelta()
@@ -337,7 +349,16 @@ const animate = () => {
     renderer.render(scene, camera);
 }
 
-function onWindowResize() {
+function updateSize(force = false) {
+    renderer.getSize(rendererSize)
+
+    if (!force) {
+        if (rendererSize.x === window.innerWidth && rendererSize.y === window.innerHeight) { return }
+
+    }
+
+
+
 
     camera.aspect = window.innerWidth / window.innerHeight;
     const fov = 50;
@@ -364,8 +385,8 @@ function onWindowResize() {
 }
 
 async function addText() {
-    const mesh = await getTextMesh('Vishal')
-    const mesh1 = await getTextMesh('Prime')
+    const mesh = await getTextMesh('optimus')
+    const mesh1 = await getTextMesh('007')
     mesh1.rotateY(Math.PI)
     mesh.translateZ(1)
     mesh1.translateZ(1)

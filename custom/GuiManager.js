@@ -1,10 +1,12 @@
-import { GUI } from "./examples/jsm/libs/lil-gui.module.min.js"
+import { GUI } from "../examples/jsm/libs/lil-gui.module.min.js"
 
 
-export class GuiManager {
+class GuiManager {
     constructor() {
-        this.gui = new GUI({ title: 'v3' })
+        this.gui = new GUI({ title: 'v4' })
+        this.gui.close()
 
+        this.arFolder = this.gui.addFolder("AR")
     }
 
     mesh(mesh, settings = {}) {
@@ -24,3 +26,6 @@ export class GuiManager {
     }
 
 }
+
+const guiManager = new GuiManager()
+export { guiManager }
