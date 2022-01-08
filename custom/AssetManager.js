@@ -63,7 +63,7 @@ const urlLibrary = {
     },
     [assetList.ubuntu_font]: './fonts/Ubuntu-Regular.ttf',
     [assetList.kenpixel]: './fonts/kenpixel.ttf',
-    [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/photo_studio_loft_hall_1k.exr',
+    [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
 
 }
 

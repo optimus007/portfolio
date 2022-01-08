@@ -8,7 +8,7 @@ import { TransformControls } from './examples/jsm/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
 import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
-
+import { USDZExporter } from '../examples/jsm/exporters/USDZExporter.js';
 
 
 let gui = guiManager.gui
@@ -100,6 +100,7 @@ const init = () => {
     renderer.setClearColor(0x000000, 0)
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.physicallyCorrectLights = true;
     // renderer.shadowMap.enabled = true;
     // renderer.shadowMap.type = THREE.VSMShadowMap;
 
@@ -215,6 +216,18 @@ const fillScene = async () => {
 }
 
 const addModel = async () => {
+    const sphereGeo = new THREE.SphereBufferGeometry(0.5)
+
+    const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0 })
+    const materialMetal = new THREE.MeshStandardMaterial({ roughness: 0, metalness: 1, envMapIntensity: 0 })
+
+    const mesh1 = new THREE.Mesh(sphereGeo, materialPlastic)
+    const mesh2 = new THREE.Mesh(sphereGeo, materialMetal)
+    mesh1.position.set(-1.5, 0.5, 0)
+    mesh2.position.set(1.5, 0.5, 0)
+    sceneGroup.add(mesh1)
+    sceneGroup.add(mesh2)
+
 
     const gltf = await assetManager.loadGLTF(assetList.model)
     const model = gltf.scene
@@ -252,17 +265,25 @@ const addModel = async () => {
 
 }
 
-const addAR = async () => {
-
-    const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
-    const mode = '3d_preferred'
-    const link = 'www.google.com'
-    const title = 'vishal_prime'
-    const vertical = true
-    const aTag = document.createElement('a')
-    aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}&enable_vertical_placement=${vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+const addAR = () => {
 
 
+
+    // ANDROID
+    const isAndroid = /android/i.test(navigator.userAgent);
+
+    let aTag = document.createElement("a");
+    const isIOS = true//aTag.relList.supports("ar") ? true : false
+
+    if (isAndroid) {
+        const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
+        const mode = '3d_preferred'
+        const link = 'www.google.com'
+        const title = 'vishal_prime'
+        const vertical = false
+
+        aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}&enable_vertical_placement=${vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+    }
 
     const arActions = {
         sceneViewer: () => {
@@ -272,15 +293,41 @@ const addAR = async () => {
             if (isAndroid) {
                 window.open(aTag)
             } else {
-                alert('Sorry only available on android devices with arcore')
+                alert('Sorry, Google AR only available on android devices with arcore')
 
             }
 
+        },
+        usdzViewer: async () => {
+            if (isIOS) {
+                // AR is available.
+                const exporter = new USDZExporter();
+                const arraybuffer = await exporter.parse(sceneGroup);
+                const blob = new Blob([arraybuffer], { type: 'application/octet-stream' });
+                aTag.rel = "ar"
+                aTag.href = URL.createObjectURL(blob);
+                aTag.download = "robot.usdz";
+                aTag.click()
+                // window.open(aTag)
+            } else {
+                alert('Sorry, Apple AR only available on iOS devices with arKit')
+
+            }
         }
+
+
     }
-    guiManager.arFolder.add(arActions, 'sceneViewer').name(" Google AR")
+
+    guiManager.arFolder.add(arActions, 'sceneViewer').name("Google AR")
+
+
+    guiManager.arFolder.add(arActions, 'usdzViewer').name("Apple AR")
+
+
 
 }
+
+
 
 const addLights = () => {
     const light = new THREE.SpotLight()

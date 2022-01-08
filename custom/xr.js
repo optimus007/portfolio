@@ -29,6 +29,8 @@ let renderer,
     hitTestSource = null,
     selectFlag = false,
     xrLight,
+    arTextDiv,
+    arText = "Test 123 123 Test",
 
     //VR
     vrSupported = false,
@@ -38,7 +40,13 @@ sessionInit.requiredFeatures = ['hit-test']
 sessionInit.optionalFeatures = ['light-estimation'];
 xrScene.add(xrGroup)
 
+const AR_TEXTS = {
+    ON_START: 'Move your device around',
+    ON_SURFACE_DETECTED: 'Surface Detected',
+    ON_SURFACE_LOST: 'Surface Lost',
+    ON_SELECT: 'Moving to detected surface',
 
+}
 
 /**
  * web xr
@@ -56,11 +64,11 @@ export class webXRController {
 
         if (arSupported) {
             this.setupARScene()
-            renderer.ph
             renderer.xr.enabled = true
 
-            renderer.physicallyCorrectLights = true;
             defaultHDRI = await assetManager.getHDRI(assets.hdri)
+            xrScene.environment = defaultHDRI
+            this.xrRender()
         }
         this.addGuiButtons()
 
@@ -120,7 +128,7 @@ export class webXRController {
         if (arSupported) {
             this.startAR()
         } else {
-            alert('Sorry ' + arStatus)
+            alert('Sorry, ' + arStatus)
         }
 
     }
@@ -151,8 +159,6 @@ export class webXRController {
 
         this.setupARUI()
         // scene
-        // const light = new THREE.HemisphereLight(0xffffff, 0xcccccc, 1)
-        // xrScene.add(light);
         const controller = renderer.xr.getController(0);
         controller.addEventListener('selectstart', () => { selectFlag = true });
         controller.addEventListener('selectend', () => { selectFlag = false });
@@ -189,6 +195,9 @@ export class webXRController {
 
         });
 
+
+
+
     }
 
     setupARUI() {
@@ -221,7 +230,46 @@ export class webXRController {
         sessionInit.domOverlay = { root: overlay };
 
 
+        // text 
+        const textDiv = document.createElement('div')
+        overlay.appendChild(textDiv);
+        textDiv.style.position = 'absolute';
+        textDiv.style.top = "10%"
+        textDiv.style.left = "10%"
+        textDiv.style.width = "80%"
+        textDiv.style.height = "10%"
+        // textDiv.style.backgroundColor = "#ff00ff"
+        textDiv.innerText = arText
+        textDiv.style.fontSize = '20px'
+        textDiv.style.textAlign = 'center';
+        textDiv.style.pointerEvents = 'none'
+        textDiv.style.userSelect = 'none';
+        arTextDiv = textDiv
 
+
+        // slider
+        const slider = document.createElement('input')
+        slider.type = 'range'
+        slider.min = 0
+        slider.innerText = 'rotation'
+        slider.max = Math.PI * 2
+        slider.step = 'any'
+        slider.value = 0
+        slider.id = 'xrRotation'
+        slider.style.position = 'absolute'
+        slider.style.left = '10%'
+        slider.style.right = '10%'
+        slider.style.bottom = '10%';
+        slider.style.width = '80%'
+        overlay.appendChild(slider);
+
+        slider.oninput = (ev) => {
+
+
+            this.rotateARGroup(slider.value)
+
+
+        }
     }
 
     onARStart = async (session) => {
@@ -233,7 +281,10 @@ export class webXRController {
         currentSession = session
         this.adoptModel()
 
-        xrScene.environment = defaultHDRI
+        this.setARText(AR_TEXTS.ON_START)
+
+
+
     }
 
     onAREnd = (event) => {
@@ -250,13 +301,14 @@ export class webXRController {
 
     onARSelect = () => {
         if (reticle.visible) {
-            console.log('SELECT')
+            // console.log('SELECT')
             xrGroup.position.setFromMatrixPosition(reticle.matrix);
             xrGroup.visible = true
         }
 
         xrLight.directionalLight.intensity = 0
         xrLight.lightProbe.intensity = 0
+        console.log(xrLight.directionalLight.position.toArray())
     }
 
     startAR() {
@@ -268,6 +320,20 @@ export class webXRController {
 
 
 
+    }
+
+    setARText(text) {
+        if (text === arTextDiv.innerText) return
+        arText = text
+        arTextDiv.innerText = arText
+
+        setTimeout(() => {
+            arTextDiv.innerText = ''
+        }, 2000)
+    }
+
+    rotateARGroup = (rad) => {
+        xrGroup.rotation.y = rad
     }
 
 
@@ -318,15 +384,23 @@ export class webXRController {
             if (hitTestResults.length) {
 
                 const hit = hitTestResults[0];
-
+                if (!reticle.visible) {
+                    this.setARText(AR_TEXTS.ON_SURFACE_DETECTED)
+                }
                 reticle.visible = true;
                 reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
                 if (selectFlag) {
                     this.onARSelect()
+                    this.setARText(AR_TEXTS.ON_SELECT)
                 }
 
-            } else {
 
+
+
+            } else {
+                if (reticle.visible) {
+                    this.setARText(AR_TEXTS.ON_SURFACE_LOST)
+                }
                 reticle.visible = false;
 
             }
