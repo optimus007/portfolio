@@ -9,6 +9,7 @@ import { getTextMesh } from './custom/MeshHandler.js';
 import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
 import { USDZExporter } from './examples/jsm/exporters/USDZExporter.js';
+import { materialHandler } from './custom/MaterialHandler.js';
 
 
 let gui = guiManager.gui
@@ -115,12 +116,14 @@ const init = () => {
     scene.add(sceneGroup)
     scene.background = new THREE.Color(0, 0, 0)
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 3, 3)
+    camera.position.set(0, 3, 5.5)
+    if (camera.aspect < 1) {
+        camera.position.z += 1
+    }
 
     controls = new OrbitControls(camera, renderer.domElement)
-    controls.target.set(0, 1.5, 0)
+    controls.target.set(0, 2, 0)
     controls.update()
-    controls.enablePan = false
     controls.minDistance = 0.5
     controls.maxDistance = 10
     transformControls = new TransformControls(camera, renderer.domElement)
@@ -132,6 +135,9 @@ const init = () => {
     });
 
     scene.add(transformControls)
+
+    guiManager.gui.add(camera, 'fov', 1, 120).onChange(() => { camera.updateProjectionMatrix() })
+    guiManager.gui.add(camera.position, 'z', 1, 4, 0.01).onChange(() => { camera.updateProjectionMatrix() })
 
     animate();
 
@@ -218,8 +224,8 @@ const fillScene = async () => {
 const addModel = async () => {
     const sphereGeo = new THREE.SphereBufferGeometry(0.5)
 
-    const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0 })
-    const materialMetal = new THREE.MeshStandardMaterial({ roughness: 0, metalness: 1, envMapIntensity: 0 })
+    const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0, name: 'spherePlastic' })
+    const materialMetal = new THREE.MeshStandardMaterial({ roughness: 0, metalness: 1, envMapIntensity: 0, name: 'sphereMetal' })
 
     const mesh1 = new THREE.Mesh(sphereGeo, materialPlastic)
     const mesh2 = new THREE.Mesh(sphereGeo, materialMetal)
@@ -231,8 +237,8 @@ const addModel = async () => {
 
     const gltf = await assetManager.loadGLTF(assetList.model)
     const model = gltf.scene
-    sceneGroup.add(model);
-    const materials = {}
+
+
     console.log({ gltf })
 
     if (gltf.animations.length) {
@@ -248,20 +254,29 @@ const addModel = async () => {
         let idleAction = mixer.clipAction(animations[0]);
 
         idleAction.play()
-        skeleton = new THREE.SkeletonHelper(model);
+        // skeleton = new THREE.SkeletonHelper(model);
 
-        scene.add(skeleton);
+        // scene.add(skeleton);
+
+        xr.connectMixer(clock, mixer)
     }
     model.traverse((node) => {
         if (node.isMesh) {
             // console.log(node.material)
             node.castShadow = true
             node.receiveShadow = true
-            materials[node.material.name] = node.material
-            node.material.envMapIntensity = 0
+
         }
     })
-    console.log(materials)
+
+    materialHandler.refresh(model)
+
+    for (const mat of Object.values(materialHandler.ALL_MATERIALS)) {
+        mat.envMapIntensity = 0
+    }
+
+    sceneGroup.add(model);
+
 
 }
 
@@ -404,26 +419,20 @@ function updateSize(force = false) {
 
     }
 
-
-
-
     camera.aspect = window.innerWidth / window.innerHeight;
-    const fov = 50;
-    const planeAspectRatio = 16 / 9;
+    // const fov = 80;
+    // const planeAspectRatio = 16 / 9;
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-
-
-    if (camera.aspect > planeAspectRatio) {
-        // window too large
-        camera.fov = fov;
-    } else {
-        // window too narrow
-        const cameraHeight = Math.tan(THREE.MathUtils.degToRad(fov / 2));
-        const ratio = camera.aspect / planeAspectRatio;
-        const newCameraHeight = cameraHeight / ratio;
-        camera.fov = THREE.MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2;
-    }
+    // if (camera.aspect > planeAspectRatio) {
+    //     // window too large
+    //     camera.fov = fov;
+    // } else {
+    //     // window too narrow
+    //     const cameraHeight = Math.tan(THREE.MathUtils.degToRad(fov / 2));
+    //     const ratio = camera.aspect / planeAspectRatio;
+    //     const newCameraHeight = cameraHeight / ratio;
+    //     camera.fov = THREE.MathUtils.radToDeg(Math.atan(newCameraHeight)) * 2;
+    // }
     camera.updateProjectionMatrix();
 
     renderer.setSize(window.innerWidth, window.innerHeight);

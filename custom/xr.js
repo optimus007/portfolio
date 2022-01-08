@@ -15,6 +15,9 @@ let renderer,
 
     modelGroup = null,
     modelGroupParent = null,
+    clock = null,
+    mixer = null,
+    delta = 0,
     defaultHDRI,
 
     currentSession = null,
@@ -74,7 +77,10 @@ export class webXRController {
 
     }
 
-
+    connectMixer(mainClock, mainMixer) {
+        clock = mainClock
+        mixer = mainMixer
+    }
 
     checkCompatibility = async () => {
         if ('xr' in navigator) {
@@ -351,6 +357,11 @@ export class webXRController {
 
     xrRender = (timeStamp, frame) => {
         TWEEN.update()
+
+        if (mixer) {
+            delta = clock.getDelta()
+            mixer.update(delta)
+        }
         if (frame) {
             this.onFrame(frame)
         }
