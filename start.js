@@ -8,7 +8,7 @@ import { TransformControls } from './examples/jsm/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
 import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
-import { USDZExporter } from '../examples/jsm/exporters/USDZExporter.js';
+import { USDZExporter } from './examples/jsm/exporters/USDZExporter.js';
 
 
 let gui = guiManager.gui
