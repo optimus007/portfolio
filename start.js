@@ -284,7 +284,7 @@ const addAR = () => {
     const isAndroid = /android/i.test(navigator.userAgent);
 
     let aTag = document.createElement("a");
-    const isIOS = true//aTag.relList.supports("ar") ? true : false
+    const isIOS = aTag.relList.supports("ar") ? true : false
 
     if (isAndroid) {
         const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
