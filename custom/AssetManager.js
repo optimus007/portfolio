@@ -34,6 +34,7 @@ let fileLoader = new THREE.FileLoader(manager)
 let ttfLoader = new TTFLoader(manager)
 let exrLoader = new EXRLoader(manager)
 let gltfLoader = new GLTFLoader(manager)
+let pmrem
 
 const assets = {}
 
@@ -74,6 +75,11 @@ class AssetManager {
         this.progress = 0
         this.assetList = assetList
     }
+    setupPmrem(renderer) {
+        if (pmrem) { return }
+        pmrem = new THREE.PMREMGenerator(renderer)
+    }
+
     getAssetList() {
         return assetList
     }
@@ -142,10 +148,15 @@ class AssetManager {
     }
 
     async loadHDRI(name) {
-        const hdri = await exrLoader.loadAsync(urlLibrary[name])
-        hdri.mapping = THREE.EquirectangularReflectionMapping
-        hdri.encoding = THREE.LinearEncoding
+        if (!pmrem) {
+            console.warn('NO PMREM')
+            return null
+        }
+        const exr = await exrLoader.loadAsync(urlLibrary[name])
+        const hdri = pmrem.fromEquirectangular(exr).texture
         assets[name] = hdri
+
+        exr.dispose()
 
     }
 

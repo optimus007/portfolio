@@ -9,7 +9,7 @@ const assets = assetManager.getAssetList()
 let font
 
 
-export const getTextMesh = async (text, color = '#00ff00', size, height,) => {
+export const getTextMesh = async (text, color = '#00ff00', maxY = 1, height,) => {
     if (!font) { font = await assetManager.getFont(assets.ubuntu_font) }
 
     const matLite = new THREE.MeshStandardMaterial({
@@ -32,8 +32,8 @@ export const getTextMesh = async (text, color = '#00ff00', size, height,) => {
     const xMid = - 0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
 
     geometry.translate(xMid, 0, 0);
-    const sizex = geometry.boundingBox.max.x - geometry.boundingBox.min.x
-    geometry.scale(1 / sizex, 1 / sizex, 1 / sizex)
+    const sizey = geometry.boundingBox.max.y - geometry.boundingBox.min.y
+    geometry.scale(maxY / sizey, maxY / sizey, maxY / sizey)
     geometry.computeBoundingBox();
 
     const mesh = new THREE.Mesh(geometry, matLite);

@@ -104,7 +104,7 @@ const init = () => {
     renderer.physicallyCorrectLights = true;
     // renderer.shadowMap.enabled = true;
     // renderer.shadowMap.type = THREE.VSMShadowMap;
-
+    assetManager.setupPmrem(renderer)
     stats = new Stats();
     document.body.appendChild(stats.dom);
 
@@ -135,9 +135,6 @@ const init = () => {
     });
 
     scene.add(transformControls)
-
-    guiManager.gui.add(camera, 'fov', 1, 120).onChange(() => { camera.updateProjectionMatrix() })
-    guiManager.gui.add(camera.position, 'z', 1, 4, 0.01).onChange(() => { camera.updateProjectionMatrix() })
 
     animate();
 
@@ -181,11 +178,10 @@ const afterInit = () => {
 
 const addEnvironment = async () => {
     const texture = await assetManager.getHDRI(assetList.hdri)
-
+    console.log('hdri', { texture })
     // scene.background = texture;
     scene.environment = texture;
-    // scene.background = new THREE.Color(0.5, 0.5, 0.5)
-    // console.log(scene.background.getHexString())
+
     tweens.hdri.tw.start()
 
 }
@@ -263,8 +259,8 @@ const addModel = async () => {
     model.traverse((node) => {
         if (node.isMesh) {
             // console.log(node.material)
-            node.castShadow = true
-            node.receiveShadow = true
+            // node.castShadow = true
+            // node.receiveShadow = true
 
         }
     })
@@ -441,13 +437,13 @@ function updateSize(force = false) {
 }
 
 async function addText() {
-    const mesh = await getTextMesh('optimus')
-    const mesh1 = await getTextMesh('007')
+    const mesh = await getTextMesh('OPTIMUS', '#000000', 0.5)
+    const mesh1 = await getTextMesh('PRIME', '#000000', 0.5)
     mesh1.rotateY(Math.PI)
     mesh.translateZ(1)
     mesh1.translateZ(1)
-    scene.add(mesh)
-    scene.add(mesh1)
+    sceneGroup.add(mesh)
+    sceneGroup.add(mesh1)
     const obj = { val: 0 }
     const tw = new TWEEN.Tween(obj)
     tw.to({ val: 1 }, 10000)

@@ -40,7 +40,9 @@ let renderer,
     vrStatus = ''
 
 sessionInit.requiredFeatures = ['hit-test']
-sessionInit.optionalFeatures = ['light-estimation'];
+// sessionInit.optionalFeatures = ['light-estimation'];
+sessionInit.optionalFeatures = [];
+
 xrScene.add(xrGroup)
 
 const AR_TEXTS = {
@@ -60,6 +62,7 @@ export class webXRController {
         modelGroup = displayModelGroup
         mainRenderFunction = renderFunction
         this.init()
+
     }
 
     init = async () => {
@@ -71,7 +74,8 @@ export class webXRController {
 
             defaultHDRI = await assetManager.getHDRI(assets.hdri)
             xrScene.environment = defaultHDRI
-            this.xrRender()
+            console.log('hdri', { defaultHDRI })
+            // this.xrRender()
         }
         this.addGuiButtons()
 
@@ -185,6 +189,10 @@ export class webXRController {
         const grid = new THREE.GridHelper(1, 10, 0xffffff, 0x000000)
         xrGroup.add(grid)
 
+    }
+
+    setupLightingEstimation() {
+
         xrLight = new XREstimatedLight(renderer);
         xrLight.addEventListener('estimationstart', () => {
 
@@ -200,10 +208,6 @@ export class webXRController {
 
 
         });
-
-
-
-
     }
 
     setupARUI() {
@@ -265,7 +269,7 @@ export class webXRController {
         slider.style.position = 'absolute'
         slider.style.left = '10%'
         slider.style.right = '10%'
-        slider.style.bottom = '10%';
+        slider.style.bottom = '5%';
         slider.style.width = '80%'
         overlay.appendChild(slider);
 
@@ -312,9 +316,11 @@ export class webXRController {
             xrGroup.visible = true
         }
 
-        xrLight.directionalLight.intensity = 0
-        xrLight.lightProbe.intensity = 0
-        console.log(xrLight.directionalLight.position.toArray())
+        if (xrLight) {
+            xrLight.directionalLight.intensity = 0
+            xrLight.lightProbe.intensity = 0
+        }
+
     }
 
     startAR() {

@@ -6,6 +6,7 @@ const CHANNELS = {
     ao: { map: 'aoMap', factor: 'aoMapIntensity' },
     rough: { map: 'roughnessMap', factor: 'roughness' },
     metal: { map: 'metalnessMap', factor: 'metalness' },
+    env: { map: 'envMap', factor: 'envMapIntensity' }
 }
 const ALL_MATERIALS = {
 
@@ -122,7 +123,28 @@ class MaterialHandler {
 
             }
 
+            if (CHANNELS[channel].factor) {
+
+                channelMaster.factor = 1
+                const keyName = CHANNELS[channel].factor
+                chFolder.add(channelMaster, 'factor', 0, 1, 0.01).onChange(() => {
+
+                    for (const material of Object.values(ALL_MATERIALS)) {
+
+                        material[keyName] = channelMaster.factor
+
+                    }
+
+                })
+
+            }
+
+
+
         }
+
+
+
     }
 
     selectMaterial(name) {
