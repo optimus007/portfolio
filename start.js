@@ -273,7 +273,12 @@ const addModel = async () => {
 
     sceneGroup.add(model);
 
-
+    
+    const gltfChair = await assetManager.loadGLTF(assetList.chair)
+    const chairModel=gltfChair.scene
+    sceneGroup.add(chairModel);
+    chairModel.scale.setScalar(0.01)
+    console.log({chairModel})
 }
 
 const addAR = () => {

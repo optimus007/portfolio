@@ -68,7 +68,7 @@ class SessionLightProbe {
 			if ( cubeMap ) {
 
 				textureProperties.__webglTexture = cubeMap;
-
+				this.xrLight.environment.needsPMREMUpdate = true;
 			}
 
 		}
