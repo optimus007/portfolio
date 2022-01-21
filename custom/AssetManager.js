@@ -50,11 +50,12 @@ const assetList = {
     hdri: 'hdri',
     model: 'model',
     robot: 'robot',
+    chair:'chair'
 }
 
 const urlLibrary = {
 
-
+    [assetList.chair]: 'https://threejs.org/examples/models/gltf/DamagedHelmet.gltf',
     [assetList.model]: './asset3d/model.glb',
     [assetList.robot]: './asset3d/robot.glb',
     [assetList.Tiled_Floor_001]: {
@@ -154,6 +155,7 @@ class AssetManager {
         }
         const exr = await exrLoader.loadAsync(urlLibrary[name])
         const hdri = pmrem.fromEquirectangular(exr).texture
+        hdri.name=name
         assets[name] = hdri
 
         exr.dispose()

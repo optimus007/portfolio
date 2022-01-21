@@ -20,6 +20,7 @@ let renderer,
     delta = 0,
     defaultHDRI,
 
+
     currentSession = null,
     sessionInit = {},
 
@@ -37,12 +38,15 @@ let renderer,
 
     //VR
     vrSupported = false,
-    vrStatus = ''
+    vrStatus = '',
+    cameraGroup = new THREE.Group()
 
 sessionInit.requiredFeatures = ['hit-test']
-// sessionInit.optionalFeatures = ['light-estimation'];
-sessionInit.optionalFeatures = [];
+sessionInit.optionalFeatures = ['light-estimation'];
+// sessionInit.optionalFeatures = [];
 
+xrScene.name = 'xrScene'
+xrGroup.name = 'xrGroup'
 xrScene.add(xrGroup)
 
 const AR_TEXTS = {
@@ -66,15 +70,16 @@ export class webXRController {
     }
 
     init = async () => {
+
         await this.checkCompatibility()
 
         if (arSupported) {
-            this.setupARScene()
-            renderer.xr.enabled = true
+            // this.setupARScene()
+            // renderer.xr.enabled = true
 
-            defaultHDRI = await assetManager.getHDRI(assets.hdri)
-            xrScene.environment = defaultHDRI
-            console.log('hdri', { defaultHDRI })
+            // defaultHDRI = await assetManager.getHDRI(assets.hdri)
+            // xrScene.environment = defaultHDRI
+            // console.log('hdri', { defaultHDRI })
             // this.xrRender()
         }
         this.addGuiButtons()
@@ -129,6 +134,7 @@ export class webXRController {
 
 
         folder.add(this, 'ARButtonClick').name('webxr AR')
+        folder.add(this, 'VRButtonClick').name('webxr VR')
 
 
 
@@ -143,12 +149,21 @@ export class webXRController {
 
     }
 
+    VRButtonClick() {
+        // if (arSupported) {
+        this.startVR()
+        // } else {
+        // alert('Sorry, ' + arStatus)
+    }
+
+
+
     adoptModel() {
         modelGroupParent = modelGroup.parent
 
         xrGroup.position.setScalar(0)
         xrGroup.rotation.set(0, 0, 0)
-        xrGroup.scale.setScalar(initialScale)
+        // xrGroup.scale.setScalar(initialScale)
 
         xrGroup.add(modelGroup)
         xrGroup.visible = false
@@ -189,6 +204,8 @@ export class webXRController {
         const grid = new THREE.GridHelper(1, 10, 0xffffff, 0x000000)
         xrGroup.add(grid)
 
+        this.setupLightingEstimation()
+
     }
 
     setupLightingEstimation() {
@@ -199,6 +216,12 @@ export class webXRController {
             // Swap the default light out for the estimated one one we start getting some estimated values.
             xrScene.add(xrLight);
 
+            if (xrLight.environment) {
+                xrLight.environment.name = 'xrEnv'
+                xrScene.environment = xrLight.environment;
+
+            }
+
         });
 
         xrLight.addEventListener('estimationend', () => {
@@ -206,7 +229,7 @@ export class webXRController {
             // Swap the lights back when we stop receiving estimated values.
             xrScene.remove(xrLight);
 
-
+            xrScene.environment = defaultHDRI
         });
     }
 
@@ -274,9 +297,28 @@ export class webXRController {
         overlay.appendChild(slider);
 
         slider.oninput = (ev) => {
-
-
             this.rotateARGroup(slider.value)
+        }
+
+        const sliderScale = document.createElement('input')
+        sliderScale.type = 'range'
+        sliderScale.min = 0.1
+        sliderScale.innerText = 'Scale'
+        sliderScale.max = 2
+        sliderScale.step = 'any'
+        sliderScale.value = 1
+        sliderScale.id = 'xrScale'
+        sliderScale.style.position = 'absolute'
+        sliderScale.style.left = '10%'
+        sliderScale.style.right = '10%'
+        sliderScale.style.bottom = '10%';
+        sliderScale.style.width = '80%'
+        overlay.appendChild(sliderScale);
+
+        sliderScale.oninput = () => {
+
+
+            this.scaleARGroup(sliderScale.value)
 
 
         }
@@ -310,15 +352,23 @@ export class webXRController {
     }
 
     onARSelect = () => {
-        if (reticle.visible) {
-            // console.log('SELECT')
-            xrGroup.position.setFromMatrixPosition(reticle.matrix);
-            xrGroup.visible = true
-        }
+
+        // console.log('SELECT')
+
+        // this.setARText(AR_TEXTS.ON_SELECT)
+        xrGroup.position.setFromMatrixPosition(reticle.matrix);
+        xrGroup.visible = true
+
 
         if (xrLight) {
-            xrLight.directionalLight.intensity = 0
-            xrLight.lightProbe.intensity = 0
+            // xrLight.directionalLight.intensity = 0
+            // xrLight.lightProbe.intensity = 0
+
+            let name = 'no hdri'
+
+            if (xrScene.environment) {
+                name = xrScene.environment.name
+            }
         }
 
     }
@@ -339,15 +389,18 @@ export class webXRController {
         arText = text
         arTextDiv.innerText = arText
 
-        setTimeout(() => {
-            arTextDiv.innerText = ''
-        }, 2000)
+        // setTimeout(() => {
+        //     arTextDiv.innerText = ''
+        // }, 2000)
     }
 
     rotateARGroup = (rad) => {
         xrGroup.rotation.y = rad
     }
 
+    scaleARGroup = (scale) => {
+        xrGroup.scale.setScalar(scale)
+    }
 
     xrAnimate = (status) => {
         if (status) {
@@ -368,7 +421,7 @@ export class webXRController {
             delta = clock.getDelta()
             mixer.update(delta)
         }
-        if (frame) {
+        if (frame && reticle) {
             this.onFrame(frame)
         }
         renderer.render(xrScene, xrCamera)
@@ -408,7 +461,6 @@ export class webXRController {
                 reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
                 if (selectFlag) {
                     this.onARSelect()
-                    this.setARText(AR_TEXTS.ON_SELECT)
                 }
 
 
@@ -424,5 +476,72 @@ export class webXRController {
 
         }
 
+    }
+
+
+
+
+
+    //VR
+
+    setupVRScene = async () => {
+
+        renderer.xr.enabled = true
+        renderer.xr.setReferenceSpaceType('local')
+        // renderer.vr.userHeight = 1.4
+        // xrScene.add(cameraGroup)
+        // cameraGroup.position.set(0, 0, -2)
+        // Group
+        defaultHDRI = await assetManager.getHDRI(assets.hdri)
+        xrScene.background = defaultHDRI
+        xrScene.environment = defaultHDRI
+        const grid = new THREE.GridHelper(1, 10, 0xffffff, 0x000000)
+        xrGroup.add(grid)
+
+        return null
+    }
+
+    onVRStart = async (session) => {
+        // cameraGroup.add(xrCamera)
+        await this.setupVRScene()
+        this.adoptModel()
+        this.xrAnimate(true)
+
+        console.log({ xrScene })
+
+        session.addEventListener('end', this.onVREnd);
+
+        await renderer.xr.setSession(session);
+
+        // button.textContent = 'EXIT VR';
+
+        currentSession = session;
+
+
+    }
+    onVRTap = () => {
+
+    }
+    onVREnd = () => {
+        currentSession.removeEventListener('end', this.onVREnd);
+        currentSession = null;
+        this.revertModel()
+        // xrScene.add(xrCamera)
+        // button.textContent = 'ENTER VR';
+        this.xrAnimate(false)
+
+    }
+
+
+    startVR = () => {
+
+
+        if (currentSession === null) {
+            const vrSessionInit = { optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers'] };
+            navigator.xr.requestSession('immersive-vr', vrSessionInit).then(this.onVRStart);
+
+        } else {
+            currentSession.end();
+        }
     }
 }
