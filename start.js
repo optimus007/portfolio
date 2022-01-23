@@ -23,7 +23,11 @@ let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, sk
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
+const buttonDiv = document.getElementById('buttons')
 const renderResolution = new THREE.Vector2()
+
+const loadedModels = []
+const buttonArray = []
 
 const params = {
     noiseIntensity: 0.5,
@@ -153,7 +157,7 @@ const afterInit = () => {
     // fillScene()
     addEnvironment()
     // addLights()
-    addModel()
+    // addModel()
     addText()
     addGrid()
     addAR()
@@ -173,6 +177,30 @@ const afterInit = () => {
     })
 
 
+    createButton(assetList.model)
+    createButton(assetList.mug)
+
+    buttonArray[0].click()
+}
+
+const createButton = (assetName) => {
+    const button = document.createElement('button')
+    button.classList.add('button')
+    button.innerText = assetName
+    // button.style.position = 'absolute'
+
+    // button.style.left = "10%"
+    // button.style.width = 10
+    // button.style.height = 50
+    // button.style.top = String(40 * buttonArray.length) + 'px'
+
+    buttonDiv.appendChild(button)
+
+    button.onclick = (ev) => {
+        console.log(button.innerText)
+        setActiveModel(button.innerText)
+    }
+    buttonArray.push(button)
 }
 
 
@@ -218,6 +246,8 @@ const fillScene = async () => {
 }
 
 const addModel = async () => {
+
+
     const sphereGeo = new THREE.SphereBufferGeometry(0.5)
 
     const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0, name: 'spherePlastic' })
@@ -279,6 +309,47 @@ const addModel = async () => {
     // sceneGroup.add(chairModel);
     // chairModel.scale.setScalar(0.01)
     // console.log({chairModel})
+
+    const mugGLTF = await assetManager.loadGLTF(assetList.mug)
+    const mug = mugGLTF.scene
+    sceneGroup.add(mug);
+
+    console.log({ mug })
+
+
+}
+
+const loadModel = async (assetName) => {
+    if (loadedModels[assetName]) {
+        return
+    }
+    console.log(assetName)
+    const gltf = await assetManager.loadGLTF(assetName)
+    const model = gltf.scene
+    loadedModels[assetName] = { name: assetName, root: model, active: false }
+
+}
+
+const setActiveModel = async (nameActive) => {
+    await loadModel(nameActive)
+
+    for (const [name, data] of Object.entries(loadedModels)) {
+        if (name === nameActive) {
+            if (data.active) {
+                console.log(name, data)
+                return
+            } else {
+                data.active = true
+                sceneGroup.add(data.root)
+            }
+        } else {
+            if (data.active) {
+                data.active = false
+                data.root.removeFromParent()
+            }
+        }
+
+    }
 }
 
 const addAR = () => {
@@ -286,19 +357,17 @@ const addAR = () => {
 
 
     // ANDROID
-    const isAndroid = /android/i.test(navigator.userAgent);
-
     let aTag = document.createElement("a");
     const isIOS = aTag.relList.supports("ar") ? true : false
 
-    if (isAndroid) {
-        const url = "https://github.com/optimus007/portfolio/blob/main/asset3d/model.glb?raw=true"
-        const mode = '3d_preferred'
-        const link = 'www.google.com'
-        const title = 'vishal_prime'
-        const vertical = false
-
-        aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${url}&mode=${mode}&link=${link}&title=${title}&enable_vertical_placement=${vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+    const androidData = {
+        prefixUrl: "https://github.com/optimus007/portfolio/blob/main/asset3d/",
+        assetName: 'model',
+        postFixUrl: ".glb?raw=true",
+        mode: '3d_preferred',
+        link: 'www.google.com',
+        title: 'vishal_prime',
+        vertical: false,
     }
 
     const arActions = {
@@ -307,6 +376,20 @@ const addAR = () => {
             const isAndroid = /android/i.test(navigator.userAgent);
 
             if (isAndroid) {
+
+                for (const val of Object.values(loadedModels)) {
+                    console.log(val)
+                    if (val.active) {
+                        androidData.assetName = val.name
+                    }
+                }
+                if (!androidData.assetName) {
+                    alert('No Active Model')
+                    return
+                }
+
+                aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.prefixUrl + androidData.assetName + androidData.postFixUrl}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+
                 window.open(aTag)
             } else {
                 alert('Sorry, Google AR only available on android devices with arcore')

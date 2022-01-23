@@ -50,7 +50,8 @@ const assetList = {
     hdri: 'hdri',
     model: 'model',
     robot: 'robot',
-    chair:'chair'
+    chair: 'chair',
+    mug: 'mug'
 }
 
 const urlLibrary = {
@@ -66,6 +67,7 @@ const urlLibrary = {
     [assetList.ubuntu_font]: './fonts/Ubuntu-Regular.ttf',
     [assetList.kenpixel]: './fonts/kenpixel.ttf',
     [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
+    [assetList.mug]: './asset3d/mug.glb',
 
 }
 
@@ -155,7 +157,7 @@ class AssetManager {
         }
         const exr = await exrLoader.loadAsync(urlLibrary[name])
         const hdri = pmrem.fromEquirectangular(exr).texture
-        hdri.name=name
+        hdri.name = name
         assets[name] = hdri
 
         exr.dispose()

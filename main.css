@@ -23,3 +23,23 @@ body {
     left: 0;
   }
 }
+
+#buttons {
+  position: absolute;
+  /* z-index: 5; */
+  top: 10%;
+  /* left: 10%; */
+  /* background-color: red; */
+  pointer-events: none;
+}
+.button {
+  opacity: 0.5;
+  background-color: #00000000;
+  color: blue;
+  text-align: center;
+  display: block;
+  font-size: 16px;
+  margin: 4px ;
+  cursor: pointer;
+  pointer-events: all;
+}
