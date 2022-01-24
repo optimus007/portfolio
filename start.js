@@ -11,6 +11,15 @@ import { webXRController } from './custom/xr.js';
 import { USDZExporter } from './examples/jsm/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';
 
+console.log(window.location.href)
+let url_string = window.location.href
+let url = new URL(url_string);
+const urlParams = {
+    model: url.searchParams.get("model")
+
+}
+
+console.log({ urlParams });
 
 let gui = guiManager.gui
 const rendererSize = new THREE.Vector2(0, 0)
@@ -37,6 +46,8 @@ const params = {
 
 }
 
+
+let masterHdriIntensity = 0
 const tweens = {
     intro: null,
     introVal: 0,
@@ -80,6 +91,8 @@ const initTweens = () => {
                 node.material.envMapIntensity = int
             }
         })
+
+        masterHdriIntensity = int
     })
 }
 
@@ -180,7 +193,16 @@ const afterInit = () => {
     createButton(assetList.model)
     createButton(assetList.mug)
 
-    buttonArray[0].click()
+    if (urlParams.model) {
+        if (urlParams.model in assetList) {
+            console.warn('FOUND FROM URL', urlParams.model)
+            // const button = buttonArray.find((b) => { return b.innerText === urlParams.model }))
+            setActiveModel(urlParams.model)
+        }
+    } else {
+        buttonArray[0].click()
+    }
+
 }
 
 const createButton = (assetName) => {
@@ -328,6 +350,12 @@ const loadModel = async (assetName) => {
     const model = gltf.scene
     loadedModels[assetName] = { name: assetName, root: model, active: false }
 
+    model.traverse((node) => {
+        if (node.material && node.material.envMapIntensity) {
+            node.material.envMapIntensity = masterHdriIntensity
+        }
+    })
+
 }
 
 const setActiveModel = async (nameActive) => {
@@ -341,6 +369,11 @@ const setActiveModel = async (nameActive) => {
             } else {
                 data.active = true
                 sceneGroup.add(data.root)
+
+                const paramsU = new URLSearchParams(location.search);
+                paramsU.set('model', data.name);
+                window.history.replaceState({}, '', `${location.pathname}?${paramsU}`);
+
             }
         } else {
             if (data.active) {
@@ -350,6 +383,8 @@ const setActiveModel = async (nameActive) => {
         }
 
     }
+
+
 }
 
 const addAR = () => {
