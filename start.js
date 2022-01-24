@@ -28,7 +28,7 @@ let transformControls
 let camNoise
 const assetList = assetManager.getAssetList()
 
-let stats, scene, camera, controls, renderer, mixer, updateArray = [], delta, skeleton
+let stats, scene, camera, controls, renderer, currentMixer, updateArray = [], delta, skeleton
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -356,6 +356,16 @@ const loadModel = async (assetName) => {
         }
     })
 
+    if (gltf.animations.length) {
+        loadedModels[assetName].mixer = new THREE.AnimationMixer(model)
+        loadedModels[assetName].actions = []
+        const animations = gltf.animations;
+        const mixer = loadedModels[assetName].mixer
+        for (const clip of animations) {
+            loadedModels[assetName].actions.push(mixer.clipAction(clip))
+        }
+
+    }
 }
 
 const setActiveModel = async (nameActive) => {
@@ -370,6 +380,12 @@ const setActiveModel = async (nameActive) => {
                 data.active = true
                 sceneGroup.add(data.root)
 
+                currentMixer = null
+                if (data.mixer) {
+                    currentMixer = data.mixer
+                    data.actions[0].play()
+                }
+
                 const paramsU = new URLSearchParams(location.search);
                 paramsU.set('model', data.name);
                 window.history.replaceState({}, '', `${location.pathname}?${paramsU}`);
@@ -379,6 +395,8 @@ const setActiveModel = async (nameActive) => {
             if (data.active) {
                 data.active = false
                 data.root.removeFromParent()
+
+
             }
         }
 
@@ -498,9 +516,6 @@ const addLights = () => {
 
 }
 
-const mixerUpdate = () => {
-    mixer.update(delta)
-}
 
 const animate = () => {
     renderer.setAnimationLoop(render)
@@ -512,9 +527,10 @@ const render = () => {
 
     delta = clock.getDelta()
 
-    // if (mixer) {
-    //     mixer.update(delta)
-    // }
+    if (currentMixer) {
+
+        currentMixer.update(delta)
+    }
 
     for (const f of updateArray) {
         f()
