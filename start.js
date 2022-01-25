@@ -2,7 +2,6 @@ import * as THREE from './build/three.module.js';
 import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
 import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
-import Stats from './examples/jsm/libs/stats.module.js';
 import { guiManager } from './custom/GuiManager.js';
 import { TransformControls } from './examples/jsm/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
@@ -19,6 +18,8 @@ const urlParams = {
 
 }
 
+
+
 console.log({ urlParams });
 
 let gui = guiManager.gui
@@ -27,8 +28,9 @@ let xr
 let transformControls
 let camNoise
 const assetList = assetManager.getAssetList()
+let currentTime = 0, PreviousTime = 0, frameCounter = 0
 
-let stats, scene, camera, controls, renderer, currentMixer, updateArray = [], delta, skeleton
+let scene, camera, controls, renderer, currentMixer, updateArray = [], delta, skeleton
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -42,7 +44,7 @@ const params = {
     noiseIntensity: 0.5,
     assetsPrint: () => { assetManager.printAssets() },
     pixelDensity: window.devicePixelRatio,
-
+    fps: 0,
 
 }
 
@@ -64,6 +66,16 @@ const tweens = {
 
         intA: 0,
         intB: 1,
+    },
+
+    model: {
+        tw: null,
+        val: 0,
+        duration: 1000,
+        easing: TWEEN.Easing.Quadratic.Out,
+
+        toVisible: null,
+        toHidden: null,
     }
 }
 
@@ -94,15 +106,72 @@ const initTweens = () => {
 
         masterHdriIntensity = int
     })
+
+    const modelDat = tweens.model
+    modelDat.tw = new TWEEN.Tween(modelDat).to({ val: 1 }, modelDat.duration).easing(modelDat.easing)
+    modelDat.tw.onStart(() => {
+        if (modelDat.toVisible) {
+            currentMixer = null
+            modelDat.toVisible.active = true
+            sceneGroup.add(modelDat.toVisible.root)
+
+            // materialHandler.refresh(modelDat.toVisible.root)
+
+            if (modelDat.toVisible.mixer) {
+                xr.connectMixer(modelDat.toVisible.mixer)
+            } else {
+                xr.connectMixer(null)
+            }
+        }
+        if (modelDat.toHidden) {
+            modelDat.toHidden.active = false
+        }
+    })
+    modelDat.tw.onUpdate(() => {
+        const toVisibleScale = THREE.MathUtils.mapLinear(modelDat.val, 0, 1, 0, 1)
+        const toHiddenScale = THREE.MathUtils.mapLinear(modelDat.val, 0, 1, 1, 0)
+        const toVisiblRotation = THREE.MathUtils.mapLinear(modelDat.val, 0, 1, Math.PI * 4, 0)
+        const toHiddenRotation = THREE.MathUtils.mapLinear(modelDat.val, 0, 1, 0, Math.PI * 4)
+
+        if (modelDat.toVisible) {
+            modelDat.toVisible.root.scale.setScalar(toVisibleScale)
+            modelDat.toVisible.root.rotation.y = toVisiblRotation
+        }
+        if (modelDat.toHidden) {
+            modelDat.toHidden.root.scale.setScalar(toHiddenScale)
+            modelDat.toHidden.root.rotation.y = toHiddenRotation
+        }
+
+    })
+    modelDat.tw.onComplete(() => {
+        if (modelDat.toVisible.mixer) {
+
+            if (modelDat.toVisible.mixer) {
+                currentMixer = modelDat.toVisible.mixer
+                modelDat.toVisible.actions[0].play()
+            }
+        }
+
+        if (modelDat.toHidden) {
+
+            modelDat.toHidden.root.removeFromParent()
+            modelDat.toHidden.root.scale.setScalar(1)
+
+        }
+    })
+
+
 }
 
 const addGui = () => {
+    gui.add(params, 'fps', 0, 120).name('Fps').listen()
 
     gui.add(params, 'pixelDensity', 0.2, window.devicePixelRatio).listen().name('Pixel density').onChange((v) => {
         renderer.setPixelRatio(v)
         renderer.getSize(renderResolution)
 
     })
+
 
     gui.add(params, 'noiseIntensity', 0, 2).name('Noise intensity').onChange((v) => {
         camNoise.intensity = v
@@ -122,8 +191,7 @@ const init = () => {
     // renderer.shadowMap.enabled = true;
     // renderer.shadowMap.type = THREE.VSMShadowMap;
     assetManager.setupPmrem(renderer)
-    stats = new Stats();
-    document.body.appendChild(stats.dom);
+
 
     document.body.appendChild(container);
     container.appendChild(renderer.domElement);
@@ -165,7 +233,7 @@ const init = () => {
 }
 
 const afterInit = () => {
-    xr = new webXRController(renderer, render, sceneGroup)
+    xr = new webXRController(renderer, render, sceneGroup, clock)
     addGui()
     // fillScene()
     addEnvironment()
@@ -196,12 +264,23 @@ const afterInit = () => {
     if (urlParams.model) {
         if (urlParams.model in assetList) {
             console.warn('FOUND FROM URL', urlParams.model)
-            // const button = buttonArray.find((b) => { return b.innerText === urlParams.model }))
             setActiveModel(urlParams.model)
         }
     } else {
         buttonArray[0].click()
     }
+
+    const sphereGeo = new THREE.SphereBufferGeometry(0.5)
+
+    const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0, name: 'spherePlastic' })
+    const materialMetal = new THREE.MeshStandardMaterial({ roughness: 0, metalness: 1, envMapIntensity: 0, name: 'sphereMetal' })
+
+    const mesh1 = new THREE.Mesh(sphereGeo, materialPlastic)
+    const mesh2 = new THREE.Mesh(sphereGeo, materialMetal)
+    mesh1.position.set(-1.5, 0.5, 0)
+    mesh2.position.set(1.5, 0.5, 0)
+    sceneGroup.add(mesh1)
+    sceneGroup.add(mesh2)
 
 }
 
@@ -209,17 +288,10 @@ const createButton = (assetName) => {
     const button = document.createElement('button')
     button.classList.add('button')
     button.innerText = assetName
-    // button.style.position = 'absolute'
-
-    // button.style.left = "10%"
-    // button.style.width = 10
-    // button.style.height = 50
-    // button.style.top = String(40 * buttonArray.length) + 'px'
 
     buttonDiv.appendChild(button)
 
     button.onclick = (ev) => {
-        console.log(button.innerText)
         setActiveModel(button.innerText)
     }
     buttonArray.push(button)
@@ -228,7 +300,7 @@ const createButton = (assetName) => {
 
 const addEnvironment = async () => {
     const texture = await assetManager.getHDRI(assetList.hdri)
-    console.log('hdri', { texture })
+
     // scene.background = texture;
     scene.environment = texture;
 
@@ -267,79 +339,7 @@ const fillScene = async () => {
 
 }
 
-const addModel = async () => {
 
-
-    const sphereGeo = new THREE.SphereBufferGeometry(0.5)
-
-    const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0, name: 'spherePlastic' })
-    const materialMetal = new THREE.MeshStandardMaterial({ roughness: 0, metalness: 1, envMapIntensity: 0, name: 'sphereMetal' })
-
-    const mesh1 = new THREE.Mesh(sphereGeo, materialPlastic)
-    const mesh2 = new THREE.Mesh(sphereGeo, materialMetal)
-    mesh1.position.set(-1.5, 0.5, 0)
-    mesh2.position.set(1.5, 0.5, 0)
-    sceneGroup.add(mesh1)
-    sceneGroup.add(mesh2)
-
-
-    const gltf = await assetManager.loadGLTF(assetList.model)
-    const model = gltf.scene
-
-
-    console.log({ gltf })
-
-    if (gltf.animations.length) {
-        mixer = new THREE.AnimationMixer(model)
-
-        updateArray.push(
-            mixerUpdate
-        )
-
-        const animations = gltf.animations;
-
-
-        let idleAction = mixer.clipAction(animations[0]);
-
-        idleAction.play()
-        // skeleton = new THREE.SkeletonHelper(model);
-
-        // scene.add(skeleton);
-
-        xr.connectMixer(clock, mixer)
-    }
-    model.traverse((node) => {
-        if (node.isMesh) {
-            // console.log(node.material)
-            // node.castShadow = true
-            // node.receiveShadow = true
-
-        }
-    })
-
-    materialHandler.refresh(model)
-
-    for (const mat of Object.values(materialHandler.ALL_MATERIALS)) {
-        mat.envMapIntensity = 0
-    }
-
-    sceneGroup.add(model);
-
-
-    // const gltfChair = await assetManager.loadGLTF(assetList.chair)
-    // const chairModel=gltfChair.scene
-    // sceneGroup.add(chairModel);
-    // chairModel.scale.setScalar(0.01)
-    // console.log({chairModel})
-
-    const mugGLTF = await assetManager.loadGLTF(assetList.mug)
-    const mug = mugGLTF.scene
-    sceneGroup.add(mug);
-
-    console.log({ mug })
-
-
-}
 
 const loadModel = async (assetName) => {
     if (loadedModels[assetName]) {
@@ -369,6 +369,9 @@ const loadModel = async (assetName) => {
 }
 
 const setActiveModel = async (nameActive) => {
+    if (tweens.model.tw._isPlaying) {
+        return
+    }
     await loadModel(nameActive)
 
     for (const [name, data] of Object.entries(loadedModels)) {
@@ -377,30 +380,33 @@ const setActiveModel = async (nameActive) => {
                 console.log(name, data)
                 return
             } else {
-                data.active = true
-                sceneGroup.add(data.root)
+                // data.active = true
+                // sceneGroup.add(data.root)
 
-                currentMixer = null
-                if (data.mixer) {
-                    currentMixer = data.mixer
-                    data.actions[0].play()
-                }
-
+                // currentMixer = null
+                // if (data.mixer) {
+                //     currentMixer = data.mixer
+                //     data.actions[0].play()
+                // }
+                tweens.model.toVisible = data
                 const paramsU = new URLSearchParams(location.search);
                 paramsU.set('model', data.name);
                 window.history.replaceState({}, '', `${location.pathname}?${paramsU}`);
-
+                document.title = data.name
             }
         } else {
             if (data.active) {
-                data.active = false
-                data.root.removeFromParent()
-
+                // data.active = false
+                // data.root.removeFromParent()
+                tweens.model.toHidden = data
 
             }
         }
 
     }
+
+
+    tweens.model.tw.start()
 
 
 }
@@ -470,10 +476,10 @@ const addAR = () => {
 
     }
 
-    guiManager.arFolder.add(arActions, 'sceneViewer').name("Google AR")
+    guiManager.xrFolder.add(arActions, 'sceneViewer').name("Google AR")
 
 
-    guiManager.arFolder.add(arActions, 'usdzViewer').name("Apple AR")
+    guiManager.xrFolder.add(arActions, 'usdzViewer').name("Apple AR")
 
 
 
@@ -518,12 +524,17 @@ const addLights = () => {
 
 
 const animate = () => {
+
     renderer.setAnimationLoop(render)
+
 }
 
 const render = () => {
+
+
+
     updateSize()
-    stats.update()
+
 
     delta = clock.getDelta()
 
@@ -544,6 +555,18 @@ const render = () => {
     TWEEN.update()
     // controls.update()
     renderer.render(scene, camera);
+
+
+    frameCounter++
+    currentTime = clock.getElapsedTime()
+
+    if (currentTime >= (PreviousTime + 1)) {
+
+        params.fps = frameCounter
+        frameCounter = 0
+        PreviousTime = currentTime
+    }
+
 }
 
 function updateSize(force = false) {

@@ -3,11 +3,11 @@ import { GUI } from "../examples/jsm/libs/lil-gui.module.min.js"
 
 class GuiManager {
     constructor() {
-        this.gui = new GUI({ title: 'v5.75 dev' })
+        this.gui = new GUI({ title: 'v5.76 dev' })
         this.gui.close()
 
-        this.arFolder = this.gui.addFolder("AR")
-        this.arFolder.close()
+        this.xrFolder = this.gui.addFolder(" X R ")
+        this.xrFolder.close()
         this.materialsFolder = this.gui.addFolder("Materials")
         this.materialsFolder.close()
     }

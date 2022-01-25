@@ -63,9 +63,10 @@ const AR_TEXTS = {
  * web xr
  */
 export class webXRController {
-    constructor(webglRenderer, renderFunction, displayModelGroup) {
+    constructor(webglRenderer, renderFunction, displayModelGroup, mainClock) {
         renderer = webglRenderer
         modelGroup = displayModelGroup
+        clock = mainClock
         mainRenderFunction = renderFunction
         this.init()
 
@@ -74,7 +75,7 @@ export class webXRController {
     init = async () => {
 
         await this.checkCompatibility()
-
+        this.addGuiButtons()
         if (!arSupported && !vrSupported) { return }
         renderer.xr.enabled = true
         renderer.xr.setReferenceSpaceType('local')
@@ -90,12 +91,12 @@ export class webXRController {
             this.setupVRScene()
         }
 
-        this.addGuiButtons()
+
 
     }
 
-    connectMixer(mainClock, mainMixer) {
-        clock = mainClock
+    connectMixer(mainMixer) {
+
         mixer = mainMixer
     }
 
@@ -156,7 +157,7 @@ export class webXRController {
     }
 
     addGuiButtons() {
-        const folder = guiManager.arFolder
+        const folder = guiManager.xrFolder
 
         folder.close()
         const params = {
@@ -181,12 +182,12 @@ export class webXRController {
     }
 
     VRButtonClick() {
-        // if (arSupported) {
-        this.startVR()
-        // } else {
-        // alert('Sorry, ' + arStatus)
+        if (vrSupported) {
+            this.startVR()
+        } else {
+            alert('Sorry, ' + vrStatus)
+        }
     }
-
 
 
     adoptModel() {
@@ -448,6 +449,12 @@ export class webXRController {
 
 
 
+    /**
+     * render func
+     * @param {*} timeStamp 
+     * @param {*} frame 
+     */
+
     xrRender = (timeStamp, frame) => {
         TWEEN.update()
 
@@ -461,6 +468,10 @@ export class webXRController {
         renderer.render(xrScene, xrCamera)
     }
 
+    /**
+     * For AR hit test
+     * @param {*} frame 
+     */
     onARFrame = (frame) => {
         const referenceSpace = renderer.xr.getReferenceSpace()
 

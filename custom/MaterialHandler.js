@@ -60,6 +60,7 @@ class MaterialHandler {
     updateGui() {
         // map and factor
 
+
         const folder = this.materialMainFolder
 
 
