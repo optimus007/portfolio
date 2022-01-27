@@ -1,10 +1,10 @@
 import * as THREE from '../build/three.module.js';
+// import * as TWEEN from '../examples/jsm/libs/tween.esm.js';
 import { TTFLoader } from "../examples/jsm/loaders/TTFLoader.js"
-import { Font } from '../examples/jsm/loaders/FontLoader.js';
-import { EXRLoader } from '../examples/jsm/loaders/EXRLoader.js';
-import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
-import * as  TWEEN from '../examples/jsm/libs/tween.esm.js';
-import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
+// import { Font } from '../examples/jsm/loaders/FontLoader.js';
+// import { EXRLoader } from '../examples/jsm/loaders/EXRLoader.js';
+// import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
+// import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
 
 const manager = new THREE.LoadingManager();
 
