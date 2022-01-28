@@ -1,4 +1,4 @@
-import * as THREE from '../build/three.module.js'
+import * as THREE from 'three';
 import * as  TWEEN from '../examples/jsm/libs/tween.esm.js'
 import { assetManager } from './AssetManager.js'
 

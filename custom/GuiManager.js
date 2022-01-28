@@ -10,6 +10,8 @@ class GuiManager {
         this.xrFolder.close()
         this.materialsFolder = this.gui.addFolder("Materials")
         this.materialsFolder.close()
+
+        this.curveFolder = this.gui.addFolder("Curves")
     }
 
     mesh(mesh, settings = {}) {

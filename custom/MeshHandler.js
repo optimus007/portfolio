@@ -1,4 +1,4 @@
-import * as THREE from '../build/three.module.js';
+import * as THREE from 'three';
 
 import { TextGeometry } from "../examples/jsm/geometries/TextGeometry.js"
 import { assetManager } from "./AssetManager.js"

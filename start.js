@@ -1,4 +1,4 @@
-import * as THREE from './build/three.module.js';
+import * as THREE from 'three';
 import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
 import { Reflector } from './examples/jsm/objects/Reflector.js';
 import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
@@ -9,6 +9,7 @@ import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
 import { USDZExporter } from './examples/jsm/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';
+import { CurveManager } from './custom/CurveManager.js';
 
 console.log(window.location.href)
 let url_string = window.location.href
@@ -234,6 +235,7 @@ const init = () => {
 
 const afterInit = () => {
     xr = new webXRController(renderer, render, sceneGroup, clock)
+    // let curveManager = new CurveManager(scene, camera, controls)
     addGui()
     // fillScene()
     addEnvironment()
