@@ -439,7 +439,7 @@ const addAR = () => {
     const arActions = {
         sceneViewer: () => {
             // Check whether this is an Android device.
-            const isAndroid = true// /android/i.test(navigator.userAgent);
+            const isAndroid = /android/i.test(navigator.userAgent);
 
             if (isAndroid) {
 
