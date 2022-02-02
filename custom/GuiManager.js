@@ -1,4 +1,4 @@
-import { GUI } from "../examples/jsm/libs/lil-gui.module.min.js"
+import { GUI } from "three-addons/libs/lil-gui.module.min.js"
 
 
 class GuiManager {
@@ -11,7 +11,11 @@ class GuiManager {
         this.materialsFolder = this.gui.addFolder("Materials")
         this.materialsFolder.close()
 
-        this.curveFolder = this.gui.addFolder("Curves")
+        this.captureFolder = this.gui.addFolder("Photo Mode")
+        this.captureFolder.close()
+
+        this.curveFolder = this.gui.addFolder("Track Curves")
+        this.curveFolder.close()
     }
 
     mesh(mesh, settings = {}) {

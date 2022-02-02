@@ -8,6 +8,25 @@ const CHANNELS = {
     metal: { map: 'metalnessMap', factor: 'metalness' },
     env: { map: 'envMap', factor: 'envMapIntensity' }
 }
+const factorKeys = [
+    ' opacity',
+    '_alphaTest',
+    'roughness',
+    'metalness',
+    'lightMapIntensity',
+    'aoMapIntensity',
+    'emissiveIntensity',
+    'envMapIntensity',
+    'clearcoatRoughness',
+    'sheenRoughness',
+    'thickness',
+    'attenuationDistance',
+    'specularIntensity',
+    '_sheen',
+    '_clearcoat',
+    '_transmission',
+]
+
 const ALL_MATERIALS = {
 
 }
@@ -91,6 +110,27 @@ class MaterialHandler {
             return
         }
 
+        for (const [key, value] of Object.entries(this.selectedMaterial)) {
+            console.log(key)
+            if (factorKeys.includes(key)) {
+
+                const params = { val: this.selectedMaterial[key] }
+                this.materialEditFolder.add(params, 'val', 0, 1, 0.001).name(key).onChange((v) => {
+                    if (key.includes('_')) {
+
+                        let newKey = key.replace('_', '')
+                        this.selectedMaterial[newKey] = v
+                        console.log('new key', newKey)
+                    } else {
+                        this.selectedMaterial[key] = v
+
+                    }
+                    console.log(key, v, this.selectedMaterial[key])
+                })
+            }
+        }
+
+
 
     }
 
@@ -158,6 +198,7 @@ class MaterialHandler {
         }
 
         this.createEditFolder()
+        console.log(this.selectedMaterial)
     }
 
 

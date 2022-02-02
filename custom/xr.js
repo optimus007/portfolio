@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import * as  TWEEN from '../examples/jsm/libs/tween.esm.js'
+import * as  TWEEN from 'three-addons/libs/tween.esm.js'
 import { assetManager } from './AssetManager.js'
 
 import { guiManager } from "./GuiManager.js"
 
-import { XREstimatedLight } from '../examples/jsm/webxr/XREstimatedLight.js'
+import { XREstimatedLight } from 'three-addons/webxr/XREstimatedLight.js'
 
 const assets = assetManager.assetList
 let renderer,

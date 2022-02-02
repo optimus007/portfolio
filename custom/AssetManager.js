@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import * as TWEEN from '../examples/jsm/libs/tween.esm.js';
-import { TTFLoader } from "../examples/jsm/loaders/TTFLoader.js"
-import { Font } from '../examples/jsm/loaders/FontLoader.js';
-import { EXRLoader } from '../examples/jsm/loaders/EXRLoader.js';
-import { ImprovedNoise } from '../examples/jsm/math/ImprovedNoise.js'
-import { GLTFLoader } from '../examples/jsm/loaders/GLTFLoader.js';
+import * as TWEEN from 'three-addons/libs/tween.esm.js';
+import { TTFLoader } from "three-addons/loaders/TTFLoader.js"
+import { Font } from 'three-addons/loaders/FontLoader.js';
+import { EXRLoader } from 'three-addons/loaders/EXRLoader.js';
+import { ImprovedNoise } from 'three-addons/math/ImprovedNoise.js'
+import { GLTFLoader } from 'three-addons/loaders/GLTFLoader.js';
 
 const manager = new THREE.LoadingManager();
 
@@ -19,7 +19,7 @@ manager.onLoad = function (v) {
 
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
     assetManager.progress = itemsLoaded / itemsTotal
-    console.log('Loading file: ', { url }, '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
+    // console.log('Loading file: ', { url }, '.\nLoaded ' + itemsLoaded + ' of ' + itemsTotal + ' files.');
 
 };
 
@@ -48,17 +48,16 @@ const assetList = {
     ubuntu_font: 'ubuntu',
     kenpixel: 'keen',
     hdri: 'hdri',
-    model: 'model',
-    robot: 'robot',
+    Robot: 'robot',
     chair: 'chair',
-    mug: 'mug'
+    Mug: 'mug',
+    BubiVT: 'bubi',
 }
 
 const urlLibrary = {
 
     [assetList.chair]: 'https://threejs.org/examples/models/gltf/DamagedHelmet.gltf',
-    [assetList.model]: './asset3d/model.glb',
-    [assetList.robot]: './asset3d/robot.glb',
+    [assetList.Robot]: './asset3d/model.glb',
     [assetList.Tiled_Floor_001]: {
         arm: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
         diffuse: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
@@ -67,7 +66,8 @@ const urlLibrary = {
     [assetList.ubuntu_font]: './fonts/Ubuntu-Regular.ttf',
     [assetList.kenpixel]: './fonts/kenpixel.ttf',
     [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
-    [assetList.mug]: './asset3d/mug.glb',
+    [assetList.Mug]: './asset3d/mug.glb',
+    [assetList.BubiVT]: './asset3d/BubiVT.glb',
 
 }
 

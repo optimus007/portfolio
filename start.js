@@ -1,22 +1,23 @@
 import * as THREE from 'three';
-import { OrbitControls } from './examples/jsm/controls/OrbitControls.js';
-import { Reflector } from './examples/jsm/objects/Reflector.js';
+import { OrbitControls } from 'three-addons/controls/OrbitControls.js';
+import { Reflector } from 'three-addons/objects/Reflector.js';
 import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
 import { guiManager } from './custom/GuiManager.js';
-import { TransformControls } from './examples/jsm/controls/TransformControls.js'
+import { TransformControls } from 'three-addons/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
-import * as  TWEEN from './examples/jsm/libs/tween.esm.js';
+import * as  TWEEN from 'three-addons/libs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
-import { USDZExporter } from './examples/jsm/exporters/USDZExporter.js';
+import { USDZExporter } from 'three-addons/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';
 import { CurveManager } from './custom/CurveManager.js';
+import { Recorder } from './custom/Recorder.js';
+
 
 console.log(window.location.href)
 let url_string = window.location.href
 let url = new URL(url_string);
 const urlParams = {
-    model: url.searchParams.get("model")
-
+    model: url.searchParams.get("model"),
 }
 
 
@@ -26,6 +27,7 @@ console.log({ urlParams });
 let gui = guiManager.gui
 const rendererSize = new THREE.Vector2(0, 0)
 let xr
+let recorder
 let transformControls
 let camNoise
 const assetList = assetManager.getAssetList()
@@ -95,7 +97,9 @@ const initTweens = () => {
     hdriDat.tw = new TWEEN.Tween(hdriDat).to({ val: 1 }, hdriDat.duration)
     hdriDat.tw.delay(hdriDat.delay)
     hdriDat.tw.easing(hdriDat.easing)
+    hdriDat.tw.onStart(() => { if (!scene.background) { scene.background = scene.backgroundColor } })
     hdriDat.tw.onUpdate(() => {
+
         scene.background.copy(colorLerp(hdriDat.hexA, hdriDat.hexB, hdriDat.val))
 
         const int = THREE.MathUtils.lerp(hdriDat.intA, hdriDat.intB, hdriDat.val)
@@ -116,7 +120,7 @@ const initTweens = () => {
             modelDat.toVisible.active = true
             sceneGroup.add(modelDat.toVisible.root)
 
-            // materialHandler.refresh(modelDat.toVisible.root)
+            materialHandler.refresh(sceneGroup)
 
             if (modelDat.toVisible.mixer) {
                 xr.connectMixer(modelDat.toVisible.mixer)
@@ -182,7 +186,7 @@ const addGui = () => {
 
 const init = () => {
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0)
@@ -201,6 +205,7 @@ const init = () => {
     sceneGroup = new THREE.Group()
     scene.add(sceneGroup)
     scene.background = new THREE.Color(0, 0, 0)
+    scene.backgroundColor = scene.background
     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 3, 5.5)
     if (camera.aspect < 1) {
@@ -235,6 +240,7 @@ const init = () => {
 
 const afterInit = () => {
     xr = new webXRController(renderer, render, sceneGroup, clock)
+    recorder = new Recorder(renderer, scene, camera)
     // let curveManager = new CurveManager(scene, camera, controls)
     addGui()
     // fillScene()
@@ -260,12 +266,13 @@ const afterInit = () => {
     })
 
 
-    createButton(assetList.model)
-    createButton(assetList.mug)
+    createButton(assetList.Robot)
+    createButton(assetList.Mug)
+    createButton(assetList.BubiVT)
 
     if (urlParams.model) {
-        if (urlParams.model in assetList) {
-            console.warn('FOUND FROM URL', urlParams.model)
+        if (Object.values(assetList).includes(urlParams.model)) {
+            console.log('FOUND FROM URL', urlParams.model)
             setActiveModel(urlParams.model)
         }
     } else {
@@ -289,12 +296,19 @@ const afterInit = () => {
 const createButton = (assetName) => {
     const button = document.createElement('button')
     button.classList.add('button')
-    button.innerText = assetName
+    for (const [name, value] of Object.entries(assetList)) {
+        if (value === assetName) {
+            button.innerText = name
+            break
+        }
+    }
+    button.id = assetName
+
 
     buttonDiv.appendChild(button)
 
     button.onclick = (ev) => {
-        setActiveModel(button.innerText)
+        setActiveModel(button.id)
     }
     buttonArray.push(button)
 }
@@ -382,14 +396,7 @@ const setActiveModel = async (nameActive) => {
                 console.log(name, data)
                 return
             } else {
-                // data.active = true
-                // sceneGroup.add(data.root)
 
-                // currentMixer = null
-                // if (data.mixer) {
-                //     currentMixer = data.mixer
-                //     data.actions[0].play()
-                // }
                 tweens.model.toVisible = data
                 const paramsU = new URLSearchParams(location.search);
                 paramsU.set('model', data.name);
@@ -398,8 +405,7 @@ const setActiveModel = async (nameActive) => {
             }
         } else {
             if (data.active) {
-                // data.active = false
-                // data.root.removeFromParent()
+
                 tweens.model.toHidden = data
 
             }

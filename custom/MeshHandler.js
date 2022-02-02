@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { TextGeometry } from "../examples/jsm/geometries/TextGeometry.js"
+import { TextGeometry } from "three-addons/geometries/TextGeometry.js"
 import { assetManager } from "./AssetManager.js"
 
 
