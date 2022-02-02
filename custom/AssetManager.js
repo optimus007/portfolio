@@ -67,7 +67,7 @@ const urlLibrary = {
     [assetList.kenpixel]: './fonts/kenpixel.ttf',
     [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
     [assetList.Mug]: './asset3d/mug.glb',
-    [assetList.BubiVT]: './asset3d/BubiVT.glb',
+    [assetList.BubiVT]: './asset3d/bubiVT.glb',
 
 }
 
