@@ -71,6 +71,10 @@ const urlLibrary = {
 
 }
 
+const githubUrl = {
+    prefix: "https://github.com/optimus007/portfolio/blob/main/asset3d/",
+    postFix: "?raw=true",
+}
 
 
 class AssetManager {
@@ -91,6 +95,11 @@ class AssetManager {
         console.log({ assets })
     }
 
+    getGithubUrl(assetName) {
+        const url = urlLibrary[assetName]
+        const fileName = url.split('\\').pop().split('/').pop();
+        return `${githubUrl.prefix}${fileName}${githubUrl.postFix}`
+    }
 
     async getTextureSet(name) {
         if (this.checkIfDownloaded(name)) {

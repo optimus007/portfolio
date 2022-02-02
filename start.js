@@ -428,9 +428,8 @@ const addAR = () => {
     const isIOS = aTag.relList.supports("ar") ? true : false
 
     const androidData = {
-        prefixUrl: "https://github.com/optimus007/portfolio/blob/main/asset3d/",
+        url: '',
         assetName: 'model',
-        postFixUrl: ".glb?raw=true",
         mode: '3d_preferred',
         link: 'www.google.com',
         title: 'vishal_prime',
@@ -440,7 +439,7 @@ const addAR = () => {
     const arActions = {
         sceneViewer: () => {
             // Check whether this is an Android device.
-            const isAndroid = /android/i.test(navigator.userAgent);
+            const isAndroid = true// /android/i.test(navigator.userAgent);
 
             if (isAndroid) {
 
@@ -448,6 +447,7 @@ const addAR = () => {
                     console.log(val)
                     if (val.active) {
                         androidData.assetName = val.name
+                        androidData.url = assetManager.getGithubUrl(androidData.assetName)
                     }
                 }
                 if (!androidData.assetName) {
@@ -455,7 +455,7 @@ const addAR = () => {
                     return
                 }
 
-                aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.prefixUrl + androidData.assetName + androidData.postFixUrl}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+                aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.url}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
 
                 window.open(aTag)
             } else {
