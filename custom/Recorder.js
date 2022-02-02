@@ -4,6 +4,7 @@ import { guiManager } from "./GuiManager.js"
 const guiFolder = guiManager.captureFolder
 const PhotoResolutionPresets = {
     'Screen': [null, null],
+    '400p': [400, 400],
     '512p': [512, 512],
     '1K': [1024, 1024],
     '2K': [2048, 2048],
@@ -17,6 +18,7 @@ export class Recorder {
         renderer = mainRenderer
 
         this.restoreResolution = new THREE.Vector2(100, 100)
+        this.restorePixelDensity = 1
         this.resolution = new THREE.Vector2(512, 512)
         scene = mainScene
         camera = mainCamera
@@ -44,17 +46,20 @@ export class Recorder {
 
     capturePhoto() {
         renderer.getSize(this.restoreResolution)
-
+        this.restorePixelRatio = renderer.getPixelRatio()
         if (this.resolution.x) {
+            renderer.setPixelRatio(1)
             renderer.setSize(this.resolution.x, this.resolution.y)
             camera.aspect = this.resolution.x / this.resolution.y
             camera.updateProjectionMatrix()
+            console.log(this.resolution)
         }
         if (this.imageAlpha) {
             scene.background = null
         }
 
         renderer.render(scene, camera)
+
         let data
         if (this.imageAlpha) {
             data = renderer.domElement.toDataURL('image/png')
@@ -63,7 +68,7 @@ export class Recorder {
             data = renderer.domElement.toDataURL('image/jpeg', 1.0)
         }
 
-
+        renderer.setPixelRatio(this.restorePixelRatio)
         renderer.setSize(this.restoreResolution.x, this.restoreResolution.y)
         camera.aspect = this.restoreResolution.x / this.restoreResolution.y
         camera.updateProjectionMatrix()
