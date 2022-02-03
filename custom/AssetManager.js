@@ -52,6 +52,7 @@ const assetList = {
     chair: 'chair',
     Mug: 'mug',
     BubiVT: 'bubi',
+    ATR: 'atr',
 }
 
 const urlLibrary = {
@@ -68,6 +69,7 @@ const urlLibrary = {
     [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
     [assetList.Mug]: './asset3d/mug.glb',
     [assetList.BubiVT]: './asset3d/bubiVT.glb',
+    [assetList.ATR]: './asset3d/atr.glb',
 
 }
 
