@@ -580,8 +580,16 @@ const render = () => {
         params.fps = frameCounter
         frameCounter = 0
         PreviousTime = currentTime
-        adjustPixelRatio(params.fps)
+
         fpsDiv.innerText = params.fps
+
+        lastFewFrames.unshift(params.fps)
+        if (lastFewFrames.length === 5) {
+            lastFewFrames.pop()
+            // console.log(lastFewFrames)
+
+            adjustPixelRatio(lastFewFrames.reduce((p, c, i) => { return p + (c - p) / (i + 1) }, 0))
+        }
     }
 
 
@@ -641,6 +649,7 @@ function addGrid(params) {
     scene.add(grid)
 }
 
+const lastFewFrames = []
 function adjustPixelRatio(fps) {
     if (fps > 50) {
         if (renderer.getPixelRatio() !== window.devicePixelRatio) {
