@@ -634,9 +634,11 @@ function addGrid(params) {
 }
 
 function adjustPixelRatio(fps) {
-    if (fps > 40) {
-        return
-    } else if (fps < 20 && fps > 30) {
+    if (fps > 50) {
+        if (renderer.getPixelRatio() !== window.devicePixelRatio)
+            renderer.setPixelRatio(window.devicePixelRatio)
+
+    } else if (fps < 20 && fps > 40) {
         if (renderer.getPixelRatio() !== window.devicePixelRatio / 2)
             renderer.setPixelRatio(window.devicePixelRatio)
 
