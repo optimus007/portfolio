@@ -46,7 +46,7 @@ const buttonArray = []
 const params = {
     noiseIntensity: 0.5,
     assetsPrint: () => { assetManager.printAssets() },
-    pixelDensity: window.devicePixelRatio,
+    pixelRatio: window.devicePixelRatio,
     fps: 0,
 
 }
@@ -171,7 +171,7 @@ const initTweens = () => {
 const addGui = () => {
     gui.add(params, 'fps', 0, 120).name('Fps').listen()
 
-    gui.add(params, 'pixelDensity', 0.2, window.devicePixelRatio).listen().name('Pixel density').onChange((v) => {
+    gui.add(params, 'pixelRatio', 0.2, window.devicePixelRatio).listen().name('Pixel density').onChange((v) => {
         renderer.setPixelRatio(v)
         renderer.getSize(renderResolution)
 
@@ -635,16 +635,22 @@ function addGrid(params) {
 
 function adjustPixelRatio(fps) {
     if (fps > 50) {
-        if (renderer.getPixelRatio() !== window.devicePixelRatio)
+        if (renderer.getPixelRatio() !== window.devicePixelRatio) {
             renderer.setPixelRatio(window.devicePixelRatio)
+            params.pixelRatio = window.devicePixelRatio
+        }
 
-    } else if (fps < 20 && fps > 40) {
-        if (renderer.getPixelRatio() !== window.devicePixelRatio / 2)
-            renderer.setPixelRatio(window.devicePixelRatio)
+    } else if (fps < 30 && fps > 50) {
+        if (renderer.getPixelRatio() !== window.devicePixelRatio / 2) {
+            renderer.setPixelRatio(window.devicePixelRatio / 2)
+            params.pixelRatio = window.devicePixelRatio / 2
+        }
 
-    } else if (fps < 20) {
-        if (renderer.getPixelRatio() !== 0.8)
+    } else if (fps < 30) {
+        if (renderer.getPixelRatio() !== 0.8) {
             renderer.setPixelRatio(0.8)
+            params.pixelRatio = window.devicePixelRatio / 2
+        }
 
     }
 }
