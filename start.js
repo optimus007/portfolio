@@ -20,7 +20,14 @@ const urlParams = {
     model: url.searchParams.get("model"),
 }
 
-
+const fpsDiv = document.createElement('div')
+fpsDiv.style.position = 'absolute'
+fpsDiv.style.top = "1%"
+fpsDiv.style.left = "1%"
+// fpsDiv.style.width = "50px"
+// fpsDiv.style.height = "50px"
+fpsDiv.style.backgroundColor = "#000000"
+document.body.appendChild(fpsDiv)
 
 console.log({ urlParams });
 
@@ -574,6 +581,7 @@ const render = () => {
         frameCounter = 0
         PreviousTime = currentTime
         adjustPixelRatio(params.fps)
+        fpsDiv.innerText = params.fps
     }
 
 
