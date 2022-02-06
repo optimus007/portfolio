@@ -581,7 +581,7 @@ const render = () => {
         frameCounter = 0
         PreviousTime = currentTime
 
-        fpsDiv.innerText = params.fps
+        fpsDiv.innerText = String(params.fps) + 'fps Px:' + String(params.pixelRatio)
 
         lastFewFrames.unshift(params.fps)
         if (lastFewFrames.length === 5) {
