@@ -651,7 +651,7 @@ function addGrid(params) {
 
 const lastFewFrames = []
 function adjustPixelRatio(fps) {
-    if (fps > 50) {
+    if (fps > 60) {
         if (renderer.getPixelRatio() !== window.devicePixelRatio) {
             renderer.setPixelRatio(window.devicePixelRatio)
             params.pixelRatio = window.devicePixelRatio
