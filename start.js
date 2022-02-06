@@ -573,7 +573,9 @@ const render = () => {
         params.fps = frameCounter
         frameCounter = 0
         PreviousTime = currentTime
+        adjustPixelRatio(params.fps)
     }
+
 
 }
 
@@ -631,6 +633,18 @@ function addGrid(params) {
     scene.add(grid)
 }
 
+function adjustPixelRatio(fps) {
+    if (fps > 40) {
+        return
+    } else if (fps < 20 && fps > 30) {
+        if (renderer.getPixelRatio() !== window.devicePixelRatio / 2)
+            renderer.setPixelRatio(window.devicePixelRatio)
 
+    } else if (fps < 20) {
+        if (renderer.getPixelRatio() !== 0.8)
+            renderer.setPixelRatio(0.8)
+
+    }
+}
 
 init()
