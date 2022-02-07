@@ -666,7 +666,7 @@ function adjustPixelRatio(fps) {
     } else if (fps < 30) {
         if (renderer.getPixelRatio() !== 0.8) {
             renderer.setPixelRatio(0.8)
-            params.pixelRatio = window.devicePixelRatio / 2
+            params.pixelRatio = 0.8
         }
 
     }
