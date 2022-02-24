@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from 'three'
 import * as  TWEEN from 'three-addons/libs/tween.esm.js'
 import { assetManager } from './AssetManager.js'
 
@@ -266,12 +266,15 @@ export class webXRController {
     }
 
     setupARUI() {
-        var overlay = document.createElement('div')
+        let overlay = document.createElement('div')
+        new PointerHandler(overlay)
         overlay.style.display = 'none'
+        overlay.style.touchAction = 'none'
+
         // overlay.style.zIndex = 100
         document.body.appendChild(overlay)
 
-        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
         svg.setAttribute('width', 38)
         svg.setAttribute('height', 38)
         svg.style.position = 'absolute'
@@ -284,7 +287,7 @@ export class webXRController {
         })
         overlay.appendChild(svg)
 
-        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        let path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
         path.setAttribute('d', 'M 12,12 L 28,28 M 28,12 12,28')
         path.setAttribute('stroke', '#fff')
         path.setAttribute('stroke-width', 2)
@@ -586,4 +589,107 @@ export class webXRController {
             currentSession.end()
         }
     }
+}
+
+
+
+const ongoingTouches = []
+class PointerHandler {
+    constructor(div) {
+        this.div = div
+
+
+        this.addPointerEvents()
+        this.touch1Div = document.createElement('div')
+        this.touch1Div.style.position = 'absolute'
+        this.touch1Div.style.top = "20%"
+        this.touch1Div.style.left = "60%"
+        this.touch1Div.style.width = "50px"
+        this.touch1Div.style.height = "50px"
+        this.touch1Div.style.backgroundColor = "#00ff00"
+
+        this.touch2Div = document.createElement('div')
+        this.touch2Div.style.position = 'absolute'
+        this.touch2Div.style.top = "20%"
+        this.touch2Div.style.left = "30%"
+        this.touch2Div.style.width = "50px"
+        this.touch2Div.style.height = "50px"
+        this.touch2Div.style.backgroundColor = "#0000ff"
+
+        this.div.appendChild(this.touch1Div)
+        this.div.appendChild(this.touch2Div)
+
+    }
+
+    addPointerEvents() {
+        const el = this.div
+
+
+        el.addEventListener("pointerdown", this.down_handler, false);
+        el.addEventListener("pointerup", this.up_handler, false);
+        el.addEventListener("pointercancel", this.cancel_handler, false);
+        el.addEventListener("pointermove", this.move_handler, false);
+    }
+
+    down_handler = (event) => {
+        event.preventDefault()
+        ongoingTouches.push(event)
+
+        if (ongoingTouches.length === 2) {
+            this.twoPointers()
+        }
+
+    }
+    move_handler = (event) => {
+        event.preventDefault()
+        // console.log(event)
+
+        let idx = this.ongoingTouchIndexById(event.pointerId)
+        ongoingTouches.splice(idx, 1, event)
+
+        if (ongoingTouches.length === 2) {
+            this.twoPointers()
+        }
+
+    }
+    up_handler = (event) => {
+        event.preventDefault()
+
+        let idx = this.ongoingTouchIndexById(event.pointerId)
+        ongoingTouches.splice(idx, 1)
+        if (ongoingTouches.length === 2) {
+            this.twoPointers()
+        }
+    }
+
+    cancel_handler = (event) => {
+        let idx = this.ongoingTouchIndexById(event.pointerId)
+        ongoingTouches.splice(idx, 1)  // remove it; we're done
+    }
+
+    ongoingTouchIndexById = (idToFind) => {
+        for (let i = 0; i < ongoingTouches.length; i++) {
+            let id = ongoingTouches[i].pointerId
+
+            if (id == idToFind) {
+                return i;
+            }
+        }
+        return -1;    // not found
+    }
+
+
+    twoPointers() {
+        const pointer1 = ongoingTouches[0]
+        const pointer2 = ongoingTouches[1]
+
+        this.touch1Div.style.top = String(pointer1.offsetY - 25) + 'px'
+        this.touch1Div.style.left = String(pointer1.offsetX - 25) + 'px'
+
+        this.touch2Div.style.top = String(pointer2.offsetY - 25) + 'px'
+        this.touch2Div.style.left = String(pointer2.offsetX - 25) + 'px'
+
+        console.log(pointer1.offsetX, pointer2.offsetX)
+    }
+
 }
