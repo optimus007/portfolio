@@ -11,13 +11,14 @@ import { USDZExporter } from 'three-addons/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';
 import { CurveManager } from './custom/CurveManager.js';
 import { Recorder } from './custom/Recorder.js';
+import { DeviceOrientationControls } from 'three-addons/deprecated/DeviceOrientationControls.js';
 
 
-console.log(window.location.href)
 let url_string = window.location.href
 let url = new URL(url_string);
 const urlParams = {
     model: url.searchParams.get("model"),
+    scene: url.searchParams.get("scene")
 }
 
 const fpsDiv = document.createElement('div')
@@ -29,7 +30,6 @@ fpsDiv.style.left = "1%"
 fpsDiv.style.backgroundColor = "#000000"
 document.body.appendChild(fpsDiv)
 
-console.log({ urlParams });
 
 let gui = guiManager.gui
 const rendererSize = new THREE.Vector2(0, 0)
@@ -40,7 +40,7 @@ let camNoise
 const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
 
-let scene, camera, controls, renderer, currentMixer, updateArray = [], delta, skeleton
+let scene, camera, controls, gyroControls, renderer, currentMixer, updateArray = [], delta, skeleton
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -129,10 +129,12 @@ const initTweens = () => {
 
             materialHandler.refresh(sceneGroup)
 
-            if (modelDat.toVisible.mixer) {
-                xr.connectMixer(modelDat.toVisible.mixer)
-            } else {
-                xr.connectMixer(null)
+            if (xr) {
+                if (modelDat.toVisible.mixer) {
+                    xr.connectMixer(modelDat.toVisible.mixer)
+                } else {
+                    xr.connectMixer(null)
+                }
             }
         }
         if (modelDat.toHidden) {
@@ -239,13 +241,19 @@ const init = () => {
     // window.addEventListener('resize', updateSize);
     updateSize(true)
     initTweens()
-    afterInit()
+
+    if (urlParams.scene === 'gyro') {
+        console.warn('GOING TO GYRO SCENE')
+        gyroScene()
+        return
+    }
+    modelScene()
 
 
 
 }
 
-const afterInit = () => {
+const modelScene = () => {
     xr = new webXRController(renderer, render, sceneGroup, clock)
     recorder = new Recorder(renderer, scene, camera)
     // let curveManager = new CurveManager(scene, camera, controls)
@@ -297,6 +305,45 @@ const afterInit = () => {
     mesh2.position.set(1.5, 0.5, 0)
     sceneGroup.add(mesh1)
     sceneGroup.add(mesh2)
+
+}
+
+const gyroScene = () => {
+    addEnvironment()
+    addGrid()
+    setActiveModel(assetList.Gyro_model)
+
+    controls.target.set(0, 0, 0)
+    controls.enableZoom = false
+    controls.enablePan = false
+    camera.position.set(0, 0, 2)
+    controls.update()
+
+
+
+    const pivot = new THREE.Group()
+    scene.add(pivot)
+    pivot.add(camera)
+
+    const button = document.createElement('button')
+    button.innerHTML = 'GYRO'
+    button.style.position = 'fixed'
+    button.style.zIndex = 10
+    button.style.left = '50%'
+    button.style.top = '50%'
+    document.body.appendChild(button)
+    button.onclick = () => {
+        controls.enabled = false
+        controls.target.set(0, 0, 0)
+        camera.position.set(0, 0, 2)
+        controls.update()
+        console.log('gyro')
+        gyroControls = new DeviceOrientationControls(pivot)
+        document.body.removeChild(button)
+    }
+
+
+
 
 }
 
@@ -389,6 +436,8 @@ const loadModel = async (assetName) => {
         }
 
     }
+
+
 }
 
 const setActiveModel = async (nameActive) => {
@@ -546,12 +595,13 @@ const animate = () => {
 
 const render = () => {
 
-
+    const startTime = clock.getElapsedTime()
 
     updateSize()
 
 
     delta = clock.getDelta()
+
 
     if (currentMixer) {
 
@@ -567,6 +617,10 @@ const render = () => {
 
     // }
 
+    if (gyroControls) {
+        gyroControls.update()
+    }
+
     TWEEN.update()
     // controls.update()
     renderer.render(scene, camera);
@@ -574,6 +628,7 @@ const render = () => {
 
     frameCounter++
     currentTime = clock.getElapsedTime()
+    // console.log(1 / (currentTime - startTime))
 
     if (currentTime >= (PreviousTime + 1)) {
 
