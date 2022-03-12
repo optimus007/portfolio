@@ -40,7 +40,7 @@ let camNoise
 const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
 
-let scene, camera, controls, gyroControls, gyroTextDiv, gyroPivot, renderer, currentMixer, updateArray = [], delta, skeleton
+let scene, camera, controls, gyroControls, gyroTextDiv, gyroTarget, renderer, currentMixer, updateArray = [], delta, skeleton
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -324,7 +324,7 @@ const gyroScene = () => {
     const pivot = new THREE.Group()
     scene.add(pivot)
     pivot.add(camera)
-    gyroPivot = pivot
+
     const button = document.createElement('button')
     button.innerHTML = 'GYRO'
     button.style.position = 'fixed'
@@ -338,8 +338,8 @@ const gyroScene = () => {
         camera.position.set(0, 0, 2)
         controls.update()
         console.log('gyro', loadedModels)
-
-        gyroControls = new DeviceOrientationControls(loadedModels[assetList.Gyro_model].root)
+        gyroTarget = loadedModels[assetList.Gyro_model].root
+        gyroControls = new DeviceOrientationControls(gyroTarget)
         document.body.removeChild(button)
 
         const div = document.createElement('div')
@@ -677,8 +677,8 @@ const render = () => {
     if (gyroControls) {
         gyroControls.update()
         const phoneValues = `device  alpha:${(gyroControls.alpha).toFixed(1)},beta:${(gyroControls.beta).toFixed(1)},gamma:${(gyroControls.gamma).toFixed(1)}`
-        const euler = `euler rad x:${(gyroPivot.rotation.x).toFixed(3)},y:${(gyroPivot.rotation.y).toFixed(3)},z:${(gyroPivot.rotation.z).toFixed(3)}`
-        const quaternion = `quaternion x:${(gyroPivot.quaternion.x).toFixed(3)},y:${(gyroPivot.quaternion.y).toFixed(3)},z:${(gyroPivot.quaternion.z).toFixed(3)},w:${(gyroPivot.quaternion.w).toFixed(3)}`
+        const euler = `euler rad x:${(gyroTarget.rotation.x).toFixed(3)},y:${(gyroTarget.rotation.y).toFixed(3)},z:${(gyroTarget.rotation.z).toFixed(3)}`
+        const quaternion = `quaternion x:${(gyroTarget.quaternion.x).toFixed(3)},y:${(gyroTarget.quaternion.y).toFixed(3)},z:${(gyroTarget.quaternion.z).toFixed(3)},w:${(gyroTarget.quaternion.w).toFixed(3)}`
         gyroTextDiv.innerText = phoneValues + '\n' + euler + '\n' + quaternion
     }
 
