@@ -338,7 +338,7 @@ const gyroScene = () => {
         camera.position.set(0, 0, 2)
         controls.update()
         console.log('gyro')
-        gyroControls = new DeviceOrientationControls(pivot)
+        gyroControls = new DeviceOrientationControls(loadedModels.Gyro_model)
         document.body.removeChild(button)
 
         const div = document.createElement('div')
