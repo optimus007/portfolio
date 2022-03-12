@@ -676,7 +676,7 @@ const render = () => {
 
     if (gyroControls) {
         gyroControls.update()
-        const phoneValues = `device  alpha:${(gyroControls.alpha).toFixed(3)},beta:${(gyroControls.beta).toFixed(3)},gamma:${(gyroControls.gamma).toFixed(3)}`
+        const phoneValues = `device  alpha:${(gyroControls.alpha).toFixed(1)},beta:${(gyroControls.beta).toFixed(1)},gamma:${(gyroControls.gamma).toFixed(1)}`
         const euler = `euler rad x:${(gyroPivot.rotation.x).toFixed(3)},y:${(gyroPivot.rotation.y).toFixed(3)},z:${(gyroPivot.rotation.z).toFixed(3)}`
         const quaternion = `quaternion x:${(gyroPivot.quaternion.x).toFixed(3)},y:${(gyroPivot.quaternion.y).toFixed(3)},z:${(gyroPivot.quaternion.z).toFixed(3)},w:${(gyroPivot.quaternion.w).toFixed(3)}`
         gyroTextDiv.innerText = phoneValues + '\n' + euler + '\n' + quaternion
