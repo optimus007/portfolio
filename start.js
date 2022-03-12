@@ -358,12 +358,13 @@ const gyroScene = () => {
         slider.step = 0.001
         slider.max = 2 * Math.PI
         slider.style.height = '5vh'
-        slider.style.width = '100vw'
+        slider.style.width = '80vw'
         slider.value = 0
-        // slider.style.left = '1%'
+        slider.style.left = '10vw'
         slider.style.top = '70vh'
         slider.oninput = () => {
-            gyroControls.alphaOffset = slider.value
+            gyroControls.alphaOffset = parseFloat(slider.value)
+            // console.log(gyroControls.alphaOffset)
         }
         document.body.appendChild(slider)
     }
