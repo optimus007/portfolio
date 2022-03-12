@@ -339,7 +339,7 @@ const gyroScene = () => {
         controls.update()
         console.log('gyro', loadedModels)
 
-        gyroControls = new DeviceOrientationControls(loadedModels.Gyro_model.root)
+        gyroControls = new DeviceOrientationControls(loadedModels[assetList.Gyro_model].root)
         document.body.removeChild(button)
 
         const div = document.createElement('div')
