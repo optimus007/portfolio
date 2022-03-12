@@ -344,7 +344,7 @@ const gyroScene = () => {
         const div = document.createElement('div')
         div.style.position = 'fixed'
         div.style.zIndex = 10
-        div.style.left = '40%'
+        div.style.left = '10%'
         div.style.top = '50%'
 
         gyroTextDiv = div
