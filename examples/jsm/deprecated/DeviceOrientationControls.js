@@ -40,6 +40,10 @@ class DeviceOrientationControls extends EventDispatcher {
 
 		this.alphaOffset = 0; // radians
 
+		this.alpha = 0
+		this.beta = 0
+		this.gamma = 0
+
 		const onDeviceOrientationChangeEvent = function (event) {
 
 			scope.deviceOrientation = event;
@@ -117,11 +121,11 @@ class DeviceOrientationControls extends EventDispatcher {
 
 			if (device) {
 
-				const alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
+				const alpha = this.alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
 
-				const beta = device.beta ? MathUtils.degToRad(device.beta) : 0; // X'
+				const beta = this.beta = device.beta ? MathUtils.degToRad(device.beta) : 0; // X'
 
-				const gamma = device.gamma ? MathUtils.degToRad(device.gamma) : 0; // Y''
+				const gamma = this.gamma = device.gamma ? MathUtils.degToRad(device.gamma) : 0; // Y''
 
 				const orient = scope.screenOrientation ? MathUtils.degToRad(scope.screenOrientation) : 0; // O
 
