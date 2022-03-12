@@ -357,16 +357,47 @@ const gyroScene = () => {
         slider.min = 0
         slider.step = 0.001
         slider.max = 2 * Math.PI
-        slider.style.height = '5vh'
         slider.style.width = '80vw'
         slider.value = 0
         slider.style.left = '10vw'
         slider.style.top = '70vh'
         slider.oninput = () => {
             gyroControls.alphaOffset = parseFloat(slider.value)
-            // console.log(gyroControls.alphaOffset)
+
         }
         document.body.appendChild(slider)
+
+        const slider1 = document.createElement('input')
+        slider1.type = 'range'
+        slider1.style.position = 'absolute'
+        slider1.style.zIndex = '120'
+        slider1.min = 0
+        slider1.step = 0.001
+        slider1.max = 2 * Math.PI
+        slider1.style.width = '80vw'
+        slider1.value = 0
+        slider1.style.left = '10vw'
+        slider1.style.top = '75vh'
+        slider1.oninput = () => {
+            gyroControls.betaOffset = parseFloat(slider1.value)
+        }
+        document.body.appendChild(slider1)
+
+        const slider2 = document.createElement('input')
+        slider2.type = 'range'
+        slider2.style.position = 'absolute'
+        slider2.style.zIndex = '120'
+        slider2.min = 0
+        slider2.step = 0.001
+        slider2.max = 2 * Math.PI
+        slider2.style.width = '80vw'
+        slider2.value = 0
+        slider2.style.left = '10vw'
+        slider2.style.top = '80vh'
+        slider2.oninput = () => {
+            gyroControls.gammaOffset = parseFloat(slider2.value)
+        }
+        document.body.appendChild(slider2)
     }
 
 
