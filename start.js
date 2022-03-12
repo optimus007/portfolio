@@ -40,7 +40,7 @@ let camNoise
 const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
 
-let scene, camera, controls, gyroControls, renderer, currentMixer, updateArray = [], delta, skeleton
+let scene, camera, controls, gyroControls, gyroTextDiv, gyroPivot, renderer, currentMixer, updateArray = [], delta, skeleton
 let sceneGroup
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -324,7 +324,7 @@ const gyroScene = () => {
     const pivot = new THREE.Group()
     scene.add(pivot)
     pivot.add(camera)
-
+    gyroPivot = pivot
     const button = document.createElement('button')
     button.innerHTML = 'GYRO'
     button.style.position = 'fixed'
@@ -340,6 +340,15 @@ const gyroScene = () => {
         console.log('gyro')
         gyroControls = new DeviceOrientationControls(pivot)
         document.body.removeChild(button)
+
+        const div = document.createElement('div')
+        div.style.position = 'fixed'
+        div.style.zIndex = 10
+        div.style.left = '40%'
+        div.style.top = '50%'
+
+        gyroTextDiv = div
+        document.body.appendChild(div)
     }
 
 
@@ -619,6 +628,9 @@ const render = () => {
 
     if (gyroControls) {
         gyroControls.update()
+        const euler = `euler rad x:${(gyroPivot.rotation.x).toFixed(3)},y:${(gyroPivot.rotation.y).toFixed(3)},z:${(gyroPivot.rotation.z).toFixed(3)}`
+        const quaternion = `quaternion x:${(gyroPivot.quaternion.x).toFixed(3)},y:${(gyroPivot.quaternion.y).toFixed(3)},z:${(gyroPivot.quaternion.z).toFixed(3)},w:${(gyroPivot.quaternion.w).toFixed(3)}`
+        gyroTextDiv.innerText = euler + '\n' + quaternion
     }
 
     TWEEN.update()
