@@ -349,9 +349,24 @@ const gyroScene = () => {
 
         gyroTextDiv = div
         document.body.appendChild(div)
+
+        const slider = document.createElement('input')
+        slider.type = 'range'
+        slider.style.position = 'absolute'
+        slider.style.zIndex = '120'
+        slider.min = 0
+        slider.step = 0.001
+        slider.max = 2 * Math.PI
+        slider.style.height = '5vh'
+        slider.style.width = '100vw'
+        slider.value = 0
+        // slider.style.left = '1%'
+        slider.style.top = '70vh'
+        slider.oninput = () => {
+            gyroControls.alphaOffset = slider.value
+        }
+        document.body.appendChild(slider)
     }
-
-
 
 
 }

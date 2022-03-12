@@ -121,14 +121,16 @@ class DeviceOrientationControls extends EventDispatcher {
 
 			if (device) {
 
-				const alpha = this.alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
+				const alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
 
-				const beta = this.beta = device.beta ? MathUtils.degToRad(device.beta) : 0; // X'
+				const beta = device.beta ? MathUtils.degToRad(device.beta) : 0; // X'
 
-				const gamma = this.gamma = device.gamma ? MathUtils.degToRad(device.gamma) : 0; // Y''
+				const gamma = device.gamma ? MathUtils.degToRad(device.gamma) : 0; // Y''
 
 				const orient = scope.screenOrientation ? MathUtils.degToRad(scope.screenOrientation) : 0; // O
-
+				this.alpha = device.alpha ? device.alpha : 0
+				this.beta = device.beta ? device.beta : 0
+				this.gamma = device.gamma ? device.gamma : 0
 				setObjectQuaternion(scope.object.quaternion, alpha, beta, gamma, orient);
 
 				if (8 * (1 - lastQuaternion.dot(scope.object.quaternion)) > EPS) {
