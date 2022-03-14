@@ -138,7 +138,7 @@ class DeviceOrientationControls extends EventDispatcher {
 					alpha = 0
 				}
 				if (!this.BetaEnabled) {
-					beta = 0
+					beta = MathUtils.degToRad(90)
 				}
 				if (!this.GammaEnabled) {
 					gamma = 0
