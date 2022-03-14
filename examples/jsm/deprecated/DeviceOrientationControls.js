@@ -42,6 +42,10 @@ class DeviceOrientationControls extends EventDispatcher {
 		this.betaOffset = 0; // radians
 		this.gammaOffset = 0; // radians
 
+		this.AlphaEnabled = true
+		this.BetaEnabled = true
+		this.GammaEnabled = true
+
 		this.alpha = 0
 		this.beta = 0
 		this.gamma = 0
@@ -123,11 +127,22 @@ class DeviceOrientationControls extends EventDispatcher {
 
 			if (device) {
 
-				const alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
+				let alpha = device.alpha ? MathUtils.degToRad(device.alpha) + scope.alphaOffset : 0; // Z
+				alpha = MathUtils.mapLinear(alpha, 0, 360, -180, 180)
 
-				const beta = device.beta ? MathUtils.degToRad(device.beta) + scope.betaOffset : 0; // X'
+				let beta = device.beta ? MathUtils.degToRad(device.beta) + scope.betaOffset : 0; // X'
 
-				const gamma = device.gamma ? MathUtils.degToRad(device.gamma) + scope.gammaOffset : 0; // Y''
+				let gamma = device.gamma ? MathUtils.degToRad(device.gamma) + scope.gammaOffset : 0; // Y''
+
+				if (!this.AlphaEnabled) {
+					alpha = 0
+				}
+				if (!this.BetaEnabled) {
+					beta = 0
+				}
+				if (!this.GammaEnabled) {
+					gamma = 0
+				}
 
 				const orient = scope.screenOrientation ? MathUtils.degToRad(scope.screenOrientation) : 0; // O
 				this.alpha = device.alpha ? device.alpha : 0

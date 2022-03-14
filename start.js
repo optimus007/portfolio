@@ -351,6 +351,56 @@ const gyroScene = () => {
         gyroTextDiv = div
         document.body.appendChild(div)
 
+        const buttonA = document.createElement('input')
+        buttonA.type = 'checkbox'
+        buttonA.style.position = 'absolute'
+        buttonA.style.zIndex = '120'
+        buttonA.name = 'alpha enabled'
+        // buttonA.style.width = '30vw'
+        buttonA.checked = true
+        buttonA.style.left = '10vw'
+        buttonA.style.top = '30vh'
+        buttonA.oninput = () => {
+            // gyroControls.alphaOffset = parseFloat(buttonA.value)
+            gyroControls.AlphaEnabled = buttonA.checked
+        }
+        document.body.appendChild(buttonA)
+
+        const buttonB = document.createElement('input')
+        buttonB.type = 'checkbox'
+        buttonB.style.position = 'absolute'
+        buttonB.style.zIndex = '120'
+        buttonB.name = 'alpha enabled'
+        // buttonB.style.width = '30vw'
+        buttonB.checked = true
+        buttonB.style.left = '10vw'
+        buttonB.style.top = '35vh'
+        buttonB.oninput = () => {
+            // gyroControls.alphaOffset = parseFloat(buttonB.value)
+            gyroControls.BetaEnabled = buttonB.checked
+        }
+        document.body.appendChild(buttonB)
+
+        const buttonG = document.createElement('input')
+        buttonG.type = 'checkbox'
+        buttonG.style.position = 'absolute'
+        buttonG.style.zIndex = '120'
+        buttonG.name = 'alpha enabled'
+        // buttonG.style.width = '30vw'
+        buttonG.checked = true
+        buttonG.style.left = '10vw'
+        buttonG.style.top = '40vh'
+        buttonG.oninput = () => {
+            console.log(buttonG.checked)
+            // gyroControls.alphaOffset = parseFloat(buttonA.value)
+            gyroControls.GammaEnabled = buttonG.checked
+        }
+        document.body.appendChild(buttonG)
+
+
+
+
+
         const slider = document.createElement('input')
         slider.type = 'range'
         slider.style.position = 'absolute'
