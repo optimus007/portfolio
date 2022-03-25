@@ -53,7 +53,8 @@ const assetList = {
     Mug: 'mug',
     BubiVT: 'bubi',
     ATR: 'atr',
-    Gyro_model: 'gyroModel'
+    Gyro_model: 'gyroModel',
+    THRONE: 'throne'
 }
 
 const urlLibrary = {
@@ -72,6 +73,7 @@ const urlLibrary = {
     [assetList.BubiVT]: './asset3d/bubiVT.glb',
     [assetList.ATR]: './asset3d/atr.glb',
     [assetList.Gyro_model]: './asset3d/gyro_model.glb',
+    [assetList.THRONE]: './asset3d/throne.glb',
 
 }
 
