@@ -248,11 +248,11 @@ export class webXRController {
             // Swap the default light out for the estimated one one we start getting some estimated values.
             xrScene.add(xrLight)
 
-            // if (xrLight.environment) {
+            if (xrLight.environment) {
 
-            //     xrScene.environment = xrLight.environment
+                xrScene.environment = xrLight.environment
 
-            // }
+            }
 
         })
 
@@ -261,7 +261,7 @@ export class webXRController {
             // Swap the lights back when we stop receiving estimated values.
             xrScene.remove(xrLight)
 
-            // xrScene.environment = defaultHDRI
+            xrScene.environment = defaultHDRI
         })
     }
 
