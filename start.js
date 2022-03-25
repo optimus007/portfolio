@@ -284,6 +284,7 @@ const modelScene = () => {
     createButton(assetList.Robot)
     createButton(assetList.Mug)
     createButton(assetList.BubiVT)
+    createButton(assetList.THRONE)
 
     if (urlParams.model) {
         if (Object.values(assetList).includes(urlParams.model)) {
