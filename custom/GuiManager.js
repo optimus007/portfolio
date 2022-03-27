@@ -3,7 +3,7 @@ import { GUI } from "three-addons/libs/lil-gui.module.min.js"
 
 class GuiManager {
     constructor() {
-        this.gui = new GUI({ title: 'v6.01 dev' })
+        this.gui = new GUI({ title: 'v6.02 dev' })
         this.gui.close()
 
         this.xrFolder = this.gui.addFolder(" X R ")
@@ -11,21 +11,22 @@ class GuiManager {
         this.materialsFolder = this.gui.addFolder("Materials")
         this.materialsFolder.close()
 
+        this.meshFolder = this.gui.addFolder("Meshes")
+        this.meshFolder.close()
+
         this.captureFolder = this.gui.addFolder("Photo Mode")
         this.captureFolder.close()
 
         this.curveFolder = this.gui.addFolder("Track Curves")
         this.curveFolder.close()
+
+
     }
 
-    mesh(mesh, settings = {}) {
-        const folder = settings.folder ? options.folder : this.gui
-        if (settings.positions) {
-            folder.add(mesh.position, 'x', -1, 1, 0.01)
+    mesh(mesh, name) {
+        const folder = this.meshFolder
+        folder.add(mesh, 'visible').name(name)
 
-            folder.add(mesh.position, 'y', - 1, 1, 0.01)
-            folder.add(mesh.position, 'z', - 1, 1, 0.01)
-        }
     }
 
     add(obj, key, settings = {}) {

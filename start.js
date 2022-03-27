@@ -41,7 +41,7 @@ const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
 
 let scene, camera, controls, gyroControls, gyroTextDiv, gyroTarget, renderer, currentMixer, updateArray = [], delta, skeleton
-let sceneGroup
+
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
 const buttonDiv = document.getElementById('buttons')
@@ -94,6 +94,8 @@ const colA = new THREE.Color()
 const colB = new THREE.Color()
 const colC = new THREE.Color()
 
+const debugGroup = new THREE.Group()
+const sceneGroup = new THREE.Group()
 
 const colorLerp = (hexA, hexB, lerpValue) => {
     return colC.lerpColors(colA.set(hexA), colB.set(hexB), lerpValue)
@@ -211,7 +213,7 @@ const init = () => {
     container.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
-    sceneGroup = new THREE.Group()
+    sceneGroup.add(debugGroup)
     scene.add(sceneGroup)
     scene.background = new THREE.Color(0, 0, 0)
     scene.backgroundColor = scene.background
@@ -304,8 +306,11 @@ const modelScene = () => {
     const mesh2 = new THREE.Mesh(sphereGeo, materialMetal)
     mesh1.position.set(-1.5, 0.5, 0)
     mesh2.position.set(1.5, 0.5, 0)
-    sceneGroup.add(mesh1)
-    sceneGroup.add(mesh2)
+    debugGroup.add(mesh1)
+    debugGroup.add(mesh2)
+
+
+    guiManager.mesh(debugGroup, "debug")
 
 }
 
@@ -545,6 +550,7 @@ const loadModel = async (assetName) => {
 
     }
 
+    guiManager.mesh(model, assetName)
 
 }
 
@@ -797,8 +803,8 @@ async function addText() {
     mesh1.rotateY(Math.PI)
     mesh.translateZ(1)
     mesh1.translateZ(1)
-    sceneGroup.add(mesh)
-    sceneGroup.add(mesh1)
+    debugGroup.add(mesh)
+    debugGroup.add(mesh1)
     const obj = { val: 0 }
     const tw = new TWEEN.Tween(obj)
     tw.to({ val: 1 }, 10000)
@@ -813,7 +819,7 @@ async function addText() {
 
 function addGrid(params) {
     const grid = new THREE.GridHelper(4, 4)
-    scene.add(grid)
+    debugGroup.add(grid)
 }
 
 const lastFewFrames = []
