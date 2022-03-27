@@ -278,8 +278,8 @@ export class webXRController {
         svg.setAttribute('width', 38)
         svg.setAttribute('height', 38)
         svg.style.position = 'absolute'
-        svg.style.right = '20px'
-        svg.style.top = '20px'
+        svg.style.right = '5vw'
+        svg.style.top = '5vh'
         svg.id = 'xrExit'
         svg.addEventListener('click', () => {
 
@@ -302,7 +302,7 @@ export class webXRController {
         buttonHide.type = 'checkbox'
         buttonHide.style.position = 'absolute'
         // buttonHide.checked = true
-        buttonHide.style.left = '30vw'
+        buttonHide.style.right = '5vw'
         buttonHide.style.top = '10vh'
         buttonHide.oninput = () => {
             const itemsToHide = ['xrText', 'xrRotation', 'xrScale', 'xrExit']
