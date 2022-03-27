@@ -301,8 +301,8 @@ export class webXRController {
         const buttonHide = document.createElement('input')
         buttonHide.type = 'checkbox'
         buttonHide.style.position = 'absolute'
-        buttonHide.checked = true
-        buttonHide.style.left = '20px'
+        // buttonHide.checked = true
+        buttonHide.style.left = '40px'
         buttonHide.style.top = '20px'
         buttonHide.oninput = () => {
             const itemsToHide = ['xrText', 'xrRotation', 'xrScale', 'xrExit']
