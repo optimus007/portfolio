@@ -226,7 +226,7 @@ export class webXRController {
 
         reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
-            new THREE.MeshBasicMaterial()
+            new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.25 })
         )
         reticle.matrixAutoUpdate = false
         reticle.visible = false
@@ -267,7 +267,7 @@ export class webXRController {
 
     setupARUI() {
         let overlay = document.createElement('div')
-        new PointerHandler(overlay)
+        // new PointerHandler(overlay)
         overlay.style.display = 'none'
         overlay.style.touchAction = 'none'
 
@@ -296,11 +296,32 @@ export class webXRController {
 
         sessionInit.optionalFeatures.push('dom-overlay')
         sessionInit.domOverlay = { root: overlay }
+        //gui hide
+        const buttonHide = document.createElement('input')
+        buttonHide.type = 'checkbox'
+        buttonHide.style.position = 'absolute'
+        buttonHide.checked = true
+        buttonHide.style.right = '30px'
+        buttonHide.style.top = '20px'
+        buttonHide.oninput = () => {
+            const itemsToHide = ['xrText', 'xrRotation', 'xrScale']
+            for (const id of itemsToHide) {
+                const elem = overlay.getElementById(id)
+                if (buttonHide.checked) {
+                    elem.style.display = 'none'
+                } else {
+                    elem.style.display = ''
+                }
 
+            }
+
+        }
+        overlay.appendChild(buttonHide)
 
         // text 
         const textDiv = document.createElement('div')
         overlay.appendChild(textDiv)
+        textDiv.id = 'xrText'
         textDiv.style.position = 'absolute'
         textDiv.style.top = "10%"
         textDiv.style.left = "10%"
@@ -317,13 +338,13 @@ export class webXRController {
 
         // slider
         const slider = document.createElement('input')
+        slider.id = 'xrRotation'
         slider.type = 'range'
         slider.min = 0
         slider.innerText = 'rotation'
         slider.max = Math.PI * 2
         slider.step = 'any'
         slider.value = 0
-        slider.id = 'xrRotation'
         slider.style.position = 'absolute'
         slider.style.left = '10%'
         slider.style.right = '10%'
@@ -336,13 +357,13 @@ export class webXRController {
         }
 
         const sliderScale = document.createElement('input')
+        sliderScale.id = 'xrScale'
         sliderScale.type = 'range'
         sliderScale.min = 0.1
         sliderScale.innerText = 'Scale'
         sliderScale.max = 2
         sliderScale.step = 'any'
         sliderScale.value = 1
-        sliderScale.id = 'xrScale'
         sliderScale.style.position = 'absolute'
         sliderScale.style.left = '10%'
         sliderScale.style.right = '10%'
