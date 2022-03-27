@@ -280,6 +280,7 @@ export class webXRController {
         svg.style.position = 'absolute'
         svg.style.right = '20px'
         svg.style.top = '20px'
+        svg.id = 'xrExit'
         svg.addEventListener('click', () => {
 
             currentSession.end()
@@ -301,12 +302,12 @@ export class webXRController {
         buttonHide.type = 'checkbox'
         buttonHide.style.position = 'absolute'
         buttonHide.checked = true
-        buttonHide.style.right = '30px'
+        buttonHide.style.left = '20px'
         buttonHide.style.top = '20px'
         buttonHide.oninput = () => {
-            const itemsToHide = ['xrText', 'xrRotation', 'xrScale']
+            const itemsToHide = ['xrText', 'xrRotation', 'xrScale', 'xrExit']
             for (const id of itemsToHide) {
-                const elem = overlay.getElementById(id)
+                const elem = document.getElementById(id)
                 if (buttonHide.checked) {
                     elem.style.display = 'none'
                 } else {
