@@ -54,7 +54,8 @@ const assetList = {
     BubiVT: 'bubi',
     ATR: 'atr',
     Gyro_model: 'gyroModel',
-    THRONE: 'throne'
+    THRONE: 'Throne',
+    BONFIRE: 'Bonfire'
 }
 
 const urlLibrary = {
@@ -74,7 +75,7 @@ const urlLibrary = {
     [assetList.ATR]: './asset3d/atr.glb',
     [assetList.Gyro_model]: './asset3d/gyro_model.glb',
     [assetList.THRONE]: './asset3d/throne.glb',
-
+    [assetList.BONFIRE]: './asset3d/bonfire.glb',
 }
 
 const githubUrl = {
