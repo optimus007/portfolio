@@ -766,7 +766,7 @@ async function updateModel() {
 
         const reducer = new MaterialReducer();
         reducer.process(group);
-        console.log("Before bvh")
+        console.log("Reached onFinish , Before bvh genration")
         const generator = new PathTracingSceneWorker();
         console.log(generator)
         const result = await generator.generate(group, {
@@ -774,7 +774,7 @@ async function updateModel() {
 
                 const percent = Math.floor(100 * v);
                 loadingEl.innerText = `Building BVH : ${percent}%`;
-                console.log('BVH', { percent })
+                console.log('BVH', percent)
             }
         });
         console.log("After bvh")
@@ -829,7 +829,7 @@ async function updateModel() {
 
                         const percent = Math.floor(100 * progress.loaded / progress.total);
                         loadingEl.innerText = `Loading : ${percent}%`;
-                        console.log({ percent })
+
                     }
 
                 },
