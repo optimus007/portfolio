@@ -27,12 +27,13 @@ import { LDrawUtils } from 'three/examples/jsm/utils/LDrawUtils.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import Stats from 'three/examples/jsm/libs/stats.module.js';
 // import { generateRadialFloorTexture } from './utils/generateRadialFloorTexture.js';
-import { generateRadialFloorTexture } from 'three-gpu-pathtracer';
+import { generateRadialFloorTexture } from '../three-gpu-pathtracer-main/example/utils/generateRadialFloorTexture.js';
+
 // import { PathTracingSceneWorker } from '../src/workers/PathTracingSceneWorker.js';
-import { PathTracingSceneWorker } from 'three-gpu-pathtracer';
+import { PathTracingSceneWorker } from '../three-gpu-pathtracer-main/src/workers/PathTracingSceneWorker.js';
 
 // import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer } from '../src/index.js';
-import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer } from 'three-gpu-pathtracer';
+import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer } from '../three-gpu-pathtracer-main/src/index.js';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -768,7 +769,7 @@ async function updateModel() {
         reducer.process(group);
         console.log("Reached onFinish , Before bvh genration")
         const generator = new PathTracingSceneWorker();
-        console.log(generator)
+        console.log({ generator })
         const result = await generator.generate(group, {
             onProgress: v => {
 

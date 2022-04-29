@@ -12,7 +12,6 @@ export * from './uniforms/RenderTarget2DArray.js';
 
 // utils
 export * from './utils/GeometryPreparationUtils.js';
-export * from '../example/utils/generateRadialFloorTexture.js';
 
 
 // materials
@@ -24,5 +23,4 @@ export * from './shader/shaderMaterialSampling.js';
 export * from './shader/shaderUtils.js';
 export * from './shader/shaderStructs.js';
 
-// workers
-export * from './workers/PathTracingSceneWorker.js';
+
