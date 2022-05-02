@@ -49,6 +49,14 @@ const models = window.MODEL_LIST || {
         url: 'https://raw.githubusercontent.com/gkjohnson/3d-demo-data/main/models/nasa-m2020/Perseverance.glb',
         credit: 'Model credit NASA / JPL-Caltech',
     },
+    'Throne': {
+        url: './asset3d/throne.glb',
+        credit: 'ME',
+    },
+    'MUG': {
+        url: './asset3d/mug.glb',
+        credit: 'ME',
+    },
     'M2020 Helicopter': {
         url: 'https://raw.githubusercontent.com/gkjohnson/3d-demo-data/main/models/nasa-m2020/Ingenuity.glb',
         credit: 'Model credit NASA / JPL-Caltech',
@@ -253,7 +261,7 @@ const models = window.MODEL_LIST || {
 
 };
 
-let initialModel = Object.keys(models)[1];
+let initialModel = Object.keys(models)[0];
 // if (window.location.hash) {
 
 //     const modelName = window.location.hash.substring(1).replaceAll('%20', ' ');
@@ -776,7 +784,7 @@ async function updateModel() {
 
                 const percent = Math.floor(100 * v);
                 loadingEl.innerText = `Building BVH : ${percent}%`;
-                console.log('BVH', percent)
+
             }
         });
         console.log("After bvh")
@@ -815,6 +823,7 @@ async function updateModel() {
     const url = modelInfo.url;
     if (/(gltf|glb)$/i.test(url)) {
 
+        console.log('Loading model')
         manager.onLoad = onFinish;
         new GLTFLoader(manager)
             .setMeshoptDecoder(MeshoptDecoder)
