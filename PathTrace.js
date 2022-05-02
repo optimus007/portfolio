@@ -33,7 +33,7 @@ import { generateRadialFloorTexture } from './three-gpu-pathtracer-main/example/
 import { PathTracingSceneWorker } from './three-gpu-pathtracer-main/src/workers/PathTracingSceneWorker.js';
 
 // import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer } from '../src/index.js';
-import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer } from './three-gpu-pathtracer-main/src/index.js';
+import { PhysicalPathTracingMaterial, PathTracingRenderer, MaterialReducer, PathTracingSceneGenerator } from './three-gpu-pathtracer-main/src/index.js';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -768,7 +768,8 @@ async function updateModel() {
         const reducer = new MaterialReducer();
         reducer.process(group);
         console.log("Reached onFinish , Before bvh genration")
-        const generator = new PathTracingSceneWorker();
+        // const generator = new PathTracingSceneWorker();
+        const generator = new PathTracingSceneGenerator();
         console.log({ generator })
         const result = await generator.generate(group, {
             onProgress: v => {
@@ -795,7 +796,7 @@ async function updateModel() {
         material.materials.updateFrom(materials, textures);
         material.setDefine('MATERIAL_LENGTH', materials.length);
 
-        generator.dispose();
+        // generator.dispose();
 
         loadingEl.style.visibility = 'hidden';
 
