@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import { guiManager } from "./GuiManager.js"
-import * as  TWEEN from 'three-addons/libs/tween.esm.js'
+import * as  TWEEN from '../libs/tween.esm.js';
 
 
 let guiFolder = guiManager.curveFolder

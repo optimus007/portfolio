@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import * as  TWEEN from 'three-addons/libs/tween.esm.js'
+import * as  TWEEN from '../libs/tween.esm.js';
 import { assetManager } from './AssetManager.js'
 
 import { guiManager } from "./GuiManager.js"
@@ -19,6 +19,7 @@ let renderer,
     mixer = null,
     delta = 0,
     defaultHDRI,
+    raycaster,
 
 
     currentSession = null,
@@ -36,6 +37,8 @@ let renderer,
     xrLight,
     arTextDiv,
     arText = "Test 123 123 Test",
+    pointer = new THREE.Vector2(),
+    shouldRaycast = false,
 
     //VR
     vrSessionActive = false,
@@ -57,6 +60,10 @@ const AR_TEXTS = {
     ON_SURFACE_LOST: 'Surface Lost',
     ON_SELECT: 'Moving to detected surface',
 
+}
+
+const PARAMS = {
+    RETICLE_OPACITY: 0.25
 }
 
 /**
@@ -82,6 +89,8 @@ export class webXRController {
 
         defaultHDRI = await assetManager.getHDRI(assets.hdri)
         xrScene.environment = defaultHDRI
+
+        raycaster = new THREE.Raycaster()
 
         if (arSupported) {
             this.setupARScene()
@@ -217,8 +226,8 @@ export class webXRController {
         this.setupARUI()
         // scene
         const controller = renderer.xr.getController(0)
-        controller.addEventListener('selectstart', () => { selectFlag = true })
-        controller.addEventListener('selectend', () => { selectFlag = false })
+        // controller.addEventListener('selectstart', (e) => { selectFlag = true })
+        // controller.addEventListener('selectend', (e) => { selectFlag = false })
 
         xrScene.add(controller)
         xrScene.add(xrCamera)
@@ -226,7 +235,7 @@ export class webXRController {
 
         reticle = new THREE.Mesh(
             new THREE.RingGeometry(0.15, 0.2, 32).rotateX(- Math.PI / 2),
-            new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.25 })
+            new THREE.MeshBasicMaterial({ transparent: true, opacity: PARAMS.RETICLE_OPACITY })
         )
         reticle.matrixAutoUpdate = false
         reticle.visible = false
@@ -304,14 +313,19 @@ export class webXRController {
         // buttonHide.checked = true
         buttonHide.style.right = '5vw'
         buttonHide.style.top = '10vh'
+        buttonHide.style.opacity = "0.1"
         buttonHide.oninput = () => {
             const itemsToHide = ['xrText', 'xrRotation', 'xrScale', 'xrExit']
             for (const id of itemsToHide) {
                 const elem = document.getElementById(id)
                 if (buttonHide.checked) {
                     elem.style.display = 'none'
+                    buttonHide.style.opacity = "0.1"
+                    reticle.material.opacity = 0
                 } else {
+                    buttonHide.style.opacity = "1"
                     elem.style.display = ''
+                    reticle.material.opacity = PARAMS.RETICLE_OPACITY
                 }
 
             }
@@ -324,16 +338,17 @@ export class webXRController {
         overlay.appendChild(textDiv)
         textDiv.id = 'xrText'
         textDiv.style.position = 'absolute'
-        textDiv.style.top = "10%"
-        textDiv.style.left = "10%"
-        textDiv.style.width = "80%"
-        textDiv.style.height = "10%"
+        textDiv.style.top = "20vh"
+        textDiv.style.left = "10vw"
+        textDiv.style.width = "80vw"
+        textDiv.style.height = "10vh"
         // textDiv.style.backgroundColor = "#ff00ff"
         textDiv.innerText = arText
         textDiv.style.fontSize = '20px'
         textDiv.style.textAlign = 'center'
         textDiv.style.pointerEvents = 'none'
         textDiv.style.userSelect = 'none'
+        textDiv.style.opacity = '0.5'
         arTextDiv = textDiv
 
 
@@ -351,6 +366,7 @@ export class webXRController {
         slider.style.right = '10%'
         slider.style.bottom = '5%'
         slider.style.width = '80%'
+        slider.style.opacity = '0.5'
         overlay.appendChild(slider)
 
         slider.oninput = (ev) => {
@@ -370,6 +386,7 @@ export class webXRController {
         sliderScale.style.right = '10%'
         sliderScale.style.bottom = '10%'
         sliderScale.style.width = '80%'
+        sliderScale.style.opacity = '0.5'
         overlay.appendChild(sliderScale)
 
         sliderScale.oninput = () => {
@@ -379,6 +396,9 @@ export class webXRController {
 
 
         }
+
+        overlay.addEventListener('pointermove', this.onPointerMove, false);
+        overlay.addEventListener('pointerdown', this.onPointerDown, false);
     }
 
     onARStart = async (session) => {
@@ -411,25 +431,11 @@ export class webXRController {
         hitTestSource = null
     }
 
-    onARSelect = () => {
-
-        // console.log('SELECT')
+    onARSelect = (ev) => {
 
         // this.setARText(AR_TEXTS.ON_SELECT)
         xrGroup.position.setFromMatrixPosition(reticle.matrix)
         xrGroup.visible = true
-
-
-        if (xrLight) {
-            // xrLight.directionalLight.intensity = 0
-            // xrLight.lightProbe.intensity = 0
-
-            let name = 'no hdri'
-
-            if (xrScene.environment) {
-                name = xrScene.environment.name
-            }
-        }
 
     }
 
@@ -449,9 +455,9 @@ export class webXRController {
         arText = text
         arTextDiv.innerText = arText
 
-        // setTimeout(() => {
-        //     arTextDiv.innerText = ''
-        // }, 2000)
+        setTimeout(() => {
+            arTextDiv.innerText = ''
+        }, 2000)
     }
 
     rotateARGroup = (rad) => {
@@ -530,10 +536,14 @@ export class webXRController {
                 reticle.visible = true
                 reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix)
                 if (selectFlag) {
-                    this.onARSelect()
+                    // this.onARSelect()
+                    // not using since there are no coordinates
                 }
 
-
+                if (shouldRaycast) {
+                    this.raycastReticle()
+                    shouldRaycast = false
+                }
 
 
             } else {
@@ -548,8 +558,32 @@ export class webXRController {
 
     }
 
+    onPointerMove = (event) => {
+
+        pointer.x = (event.offsetX / window.innerWidth) * 2 - 1;
+        pointer.y = - (event.offsetY / window.innerHeight) * 2 + 1;
+        shouldRaycast = true
 
 
+    }
+
+    onPointerDown = (event) => {
+        pointer.x = (event.offsetX / window.innerWidth) * 2 - 1;
+        pointer.y = - (event.offsetY / window.innerHeight) * 2 + 1;
+        shouldRaycast = true
+
+    }
+    raycastReticle() {
+        raycaster.setFromCamera(pointer, xrCamera);
+
+        const intersects = raycaster.intersectObjects([reticle], false)
+        if (intersects.length > 0) {
+
+            console.log('RAYCAST', intersects)
+            xrGroup.position.setFromMatrixPosition(reticle.matrix)
+            xrGroup.visible = true
+        }
+    }
 
 
     //VR

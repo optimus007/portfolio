@@ -27,15 +27,12 @@ const factorKeys = [
     '_transmission',
 ]
 
-const ALL_MATERIALS = {
 
-}
 
 class MaterialHandler {
     constructor() {
         this.sceneGroup
-        this.ALL_MATERIALS = ALL_MATERIALS
-
+        this.ALL_MATERIALS = {}
         this.selectedMaterialName = 'NONE'
         this.selectedMaterial = null
         this.selectedChannel = null
@@ -43,6 +40,8 @@ class MaterialHandler {
         this.materialEditFolder = null
 
         this.materialMainFolder = guiManager.materialsFolder
+
+        this.matDropdown = null
     }
 
     /**
@@ -50,7 +49,8 @@ class MaterialHandler {
      * @param {THREE.Group} sceneGroup 
      */
     refresh(sceneGroup) {
-        sceneGroup.traverse((node) => {
+
+        sceneGroup.traverseVisible((node) => {
             if (node.material && node.material.isMeshStandardMaterial) {
                 if (!node.material.name) {
                     if (node.name) {
@@ -78,19 +78,27 @@ class MaterialHandler {
 
     updateGui() {
         // map and factor
+        if (this.materialEditFolder) {
+            this.materialEditFolder.destroy()
+            this.materialEditFolder = null
 
+
+        }
 
         const folder = this.materialMainFolder
+        this.materialEditFolder = folder.addFolder(this.selectedMaterialName)
 
-
-        const materialNames = Object.keys(ALL_MATERIALS)
+        const materialNames = Object.keys(this.ALL_MATERIALS)
         materialNames.unshift('MASTER')
         materialNames.unshift('NONE')
-
-        folder.add(this, 'selectedMaterialName', materialNames).onChange((name) => {
+        if (this.matDropdown) {
+            this.matDropdown.destroy()
+        }
+        this.matDropdown = this.materialMainFolder.add(this, 'selectedMaterialName', materialNames).onChange((name) => {
             console.log(name)
             this.selectMaterial(name)
         })
+
 
     }
     createEditFolder() {
@@ -151,7 +159,7 @@ class MaterialHandler {
                 const keyName = CHANNELS[channel].map
                 chFolder.add(channelMaster, 'mapEnabled').onChange(() => {
 
-                    for (const material of Object.values(ALL_MATERIALS)) {
+                    for (const material of Object.values(this.ALL_MATERIALS)) {
                         if (channelMaster.mapEnabled) {
                             material[keyName] = material.backup[keyName]
                         } else {
