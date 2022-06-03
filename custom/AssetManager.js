@@ -63,23 +63,23 @@ const assetList = {
 const urlLibrary = {
 
     [assetList.chair]: 'https://threejs.org/examples/models/gltf/DamagedHelmet.gltf',
-    [assetList.Robot]: '../asset3d/model.glb',
+    [assetList.Robot]: './asset3d/model.glb',
     [assetList.Tiled_Floor_001]: {
         arm: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
         diffuse: getTextureHavenURL('tiled_floor_001/tiled_floor_001_diffuse_1k.jpg'),
         normal: getTextureHavenURL('tiled_floor_001/tiled_floor_001_nor_gl_1k.jpg'),
     },
-    [assetList.ubuntu_font]: '../fonts/Ubuntu-Regular.ttf',
-    [assetList.kenpixel]: '../fonts/kenpixel.ttf',
+    [assetList.ubuntu_font]: './fonts/Ubuntu-Regular.ttf',
+    [assetList.kenpixel]: './fonts/kenpixel.ttf',
     [assetList.hdri]: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/comfy_cafe_1k.exr',
-    [assetList.Mug]: '../asset3d/mug.glb',
-    [assetList.BubiVT]: '../asset3d/bubiVT.glb',
-    [assetList.ATR]: '../asset3d/atr.glb',
-    [assetList.Gyro_model]: '../asset3d/gyro_model.glb',
-    [assetList.THRONE]: '../asset3d/throne.glb',
-    [assetList.BONFIRE]: '../asset3d/bonfire.glb',
-    [assetList.Lamp]: '../asset3d/IridescenceLamp.glb',
-    [assetList.GeckoZen]: '../asset3d/zenGecko.glb',
+    [assetList.Mug]: './asset3d/mug.glb',
+    [assetList.BubiVT]: './asset3d/bubiVT.glb',
+    [assetList.ATR]: './asset3d/atr.glb',
+    [assetList.Gyro_model]: './asset3d/gyro_model.glb',
+    [assetList.THRONE]: './asset3d/throne.glb',
+    [assetList.BONFIRE]: './asset3d/bonfire.glb',
+    [assetList.Lamp]: './asset3d/IridescenceLamp.glb',
+    [assetList.GeckoZen]: './asset3d/zenGecko.glb',
 }
 
 const githubUrl = {
