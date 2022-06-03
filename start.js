@@ -5,11 +5,11 @@ import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager
 import { guiManager } from './custom/GuiManager.js';
 import { TransformControls } from 'three-addons/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
-import * as  TWEEN from '../libs/tween.esm.js';
+import * as  TWEEN from '../exLibs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
 import { USDZExporter } from 'three-addons/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';
-import { CurveManager } from './custom/CurveManager.js';
+// import { CurveManager } from './custom/CurveManager.js';
 import { Recorder } from './custom/Recorder.js';
 // import { DeviceOrientationControls } from 'three-addons/deprecated/DeviceOrientationControls.js';
 
