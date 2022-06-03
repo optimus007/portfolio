@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as TWEEN from './exlibs/tween.esm.js';
+import * as TWEEN from '../exlibs/tween.esm.js';
 import { TTFLoader } from "three-addons/loaders/TTFLoader.js"
 import { Font } from 'three-addons/loaders/FontLoader.js';
 import { EXRLoader } from 'three-addons/loaders/EXRLoader.js';
