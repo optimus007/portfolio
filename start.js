@@ -5,7 +5,7 @@ import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager
 import { guiManager } from './custom/GuiManager.js';
 import { TransformControls } from 'three-addons/controls/TransformControls.js'
 import { getTextMesh } from './custom/MeshHandler.js';
-import * as  TWEEN from '../exLibs/tween.esm.js';
+import * as  TWEEN from './exlibs/tween.esm.js';
 import { webXRController } from './custom/xr.js';
 import { USDZExporter } from 'three-addons/exporters/USDZExporter.js';
 import { materialHandler } from './custom/MaterialHandler.js';

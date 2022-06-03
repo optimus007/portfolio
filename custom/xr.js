@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import * as  TWEEN from '../exLibs/tween.esm.js';
+import * as  TWEEN from './exlibs/tween.esm.js';
 import { assetManager } from './AssetManager.js'
 
 import { guiManager } from "./GuiManager.js"
