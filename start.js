@@ -40,6 +40,7 @@ let transformControls
 let camNoise
 const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
+let currentModelName = ""
 
 let scene, camera, controls, gyroControls, gyroTextDiv, gyroTarget, renderer, currentMixer, updateArray = [], delta, skeleton
 
@@ -570,8 +571,9 @@ const setActiveModel = async (nameActive) => {
     if (tweens.model.tw._isPlaying) {
         return
     }
+    currentModelName = nameActive
     await loadModel(nameActive)
-
+    console.log({ currentModelName })
     for (const [name, data] of Object.entries(loadedModels)) {
         if (name === nameActive) {
             if (data.active) {
@@ -582,8 +584,10 @@ const setActiveModel = async (nameActive) => {
                 tweens.model.toVisible = data
                 const paramsU = new URLSearchParams(location.search);
                 paramsU.set('model', data.name);
+
                 window.history.replaceState({}, '', `${location.pathname}?${paramsU}`);
-                document.title = data.name
+                document.title = data.name + " | vis_prime"
+
             }
         } else {
             if (data.active) {
@@ -613,8 +617,8 @@ const addAR = () => {
         url: '',
         assetName: 'model',
         mode: '3d_preferred',
-        link: 'www.google.com',
-        title: 'vishal_prime',
+        link: 'vis_prime',
+        title: () => { return currentModelName },
         vertical: false,
     }
 
@@ -637,7 +641,7 @@ const addAR = () => {
                     return
                 }
 
-                aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.url}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+                aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.url}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title()}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
 
                 window.open(aTag)
             } else {
