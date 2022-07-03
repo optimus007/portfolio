@@ -164,10 +164,17 @@ const initTweens = () => {
     modelDat.tw.onComplete(() => {
         if (modelDat.toVisible.mixer) {
 
-            if (modelDat.toVisible.mixer) {
-                currentMixer = modelDat.toVisible.mixer
-                modelDat.toVisible.actions[0].play()
+
+            console.log("ANI COMPLETE", modelDat)
+            currentMixer = modelDat.toVisible.mixer
+            for (const action of modelDat.toVisible.actions) {
+                action.setEffectiveWeight(1)
+                action.reset()
+                action.play()
+                console.log(action)
             }
+            // modelDat.toVisible.actions[0].play()
+
         }
 
         if (modelDat.toHidden) {
@@ -543,12 +550,15 @@ const loadModel = async (assetName) => {
             node.material.envMapIntensity = masterHdriIntensity
         }
     })
+    model.name = assetName
 
     if (gltf.animations.length) {
+
         loadedModels[assetName].mixer = new THREE.AnimationMixer(model)
         loadedModels[assetName].actions = []
         const animations = gltf.animations;
         const mixer = loadedModels[assetName].mixer
+        console.log('animations', loadedModels[assetName])
         for (const clip of animations) {
             loadedModels[assetName].actions.push(mixer.clipAction(clip))
         }
@@ -732,10 +742,7 @@ let maxFrameRate = 0
 
 const render = () => {
 
-    const startTime = clock.getElapsedTime()
-
     updateSize()
-
 
     delta = clock.getDelta()
 
@@ -743,6 +750,7 @@ const render = () => {
     if (currentMixer) {
 
         currentMixer.update(delta)
+
     }
 
     for (const f of updateArray) {
@@ -768,7 +776,7 @@ const render = () => {
 
 
     frameCounter++
-    currentTime = clock.getElapsedTime()
+    currentTime = performance.now()
     // console.log(1 / (currentTime - startTime))
 
     // if (currentTime >= (PreviousTime + 1)) {
@@ -790,7 +798,7 @@ const render = () => {
 
     // console.log((currentTime - startTime) * 10000)
 
-    var now = clock.getElapsedTime()
+    var now = performance.now()
     var fs = (now - lastFameTime);
     var fps1 = Math.round(1 / fs);
 
