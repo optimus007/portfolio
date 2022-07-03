@@ -59,6 +59,7 @@ const assetList = {
     Lamp: 'IridescenceLamp',
     GeckoZen: 'geckoZen',
     Cupboard: 'cupboard',
+    House: 'house'
 }
 
 const urlLibrary = {
@@ -82,6 +83,7 @@ const urlLibrary = {
     [assetList.Lamp]: './asset3d/IridescenceLamp.glb',
     [assetList.GeckoZen]: './asset3d/zenGecko.glb',
     [assetList.Cupboard]: './asset3d/cupboard.glb',
+    [assetList.House]: './asset3d/house.glb',
 }
 
 const githubUrl = {
