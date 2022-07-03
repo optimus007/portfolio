@@ -34,6 +34,7 @@ document.body.appendChild(fpsDiv)
 const box3 = new THREE.Box3()
 let gui = guiManager.gui
 const rendererSize = new THREE.Vector2(0, 0)
+rendererSize
 let xr
 let recorder
 let transformControls
@@ -572,6 +573,8 @@ const loadModel = async (assetName) => {
     camNoise.stop()
     box3.getCenter(controls.target)
     box3.getSize(camera.position)
+
+    controls.maxDistance = camera.position.length() * 1.5
     // camera.position.set(0,0,0)
     controls.update()
     camNoise.start()
