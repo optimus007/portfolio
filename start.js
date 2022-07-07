@@ -13,7 +13,7 @@ import { materialHandler } from './custom/MaterialHandler.js';
 import { Recorder } from './custom/Recorder.js';
 // import { DeviceOrientationControls } from 'three-addons/deprecated/DeviceOrientationControls.js';
 
-
+const AR_BUTTON = document.getElementById('AR')
 
 let url_string = window.location.href
 let url = new URL(url_string);
@@ -308,8 +308,13 @@ const modelScene = () => {
         }
     } else {
         buttonArray[0].click()
-    }
 
+    }
+    AR_BUTTON.onclick = () => {
+        if (xr) {
+            xr.ARButtonClick()
+        }
+    }
     const sphereGeo = new THREE.SphereBufferGeometry(0.5)
 
     const materialPlastic = new THREE.MeshStandardMaterial({ roughness: 0, envMapIntensity: 0, name: 'spherePlastic' })

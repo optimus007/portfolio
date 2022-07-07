@@ -43,3 +43,13 @@ body {
   cursor: pointer;
   pointer-events: all;
 }
+
+#AR{
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  margin: 0;
+  background-color: aquamarine;
+}
