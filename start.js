@@ -14,6 +14,7 @@ import { Recorder } from './custom/Recorder.js';
 // import { DeviceOrientationControls } from 'three-addons/deprecated/DeviceOrientationControls.js';
 
 const AR_BUTTON = document.getElementById('AR')
+const aTag = document.getElementById('aTag')
 
 let url_string = window.location.href
 let url = new URL(url_string);
@@ -91,7 +92,7 @@ const tweens = {
         toHidden: null,
     }
 }
-
+let usdzExporter
 
 const colA = new THREE.Color()
 const colB = new THREE.Color()
@@ -311,9 +312,7 @@ const modelScene = () => {
 
     }
     AR_BUTTON.onclick = () => {
-        if (xr) {
-            xr.ARButtonClick()
-        }
+        startNativeAR()
     }
     const sphereGeo = new THREE.SphereBufferGeometry(0.5)
 
@@ -628,7 +627,7 @@ const addAR = () => {
 
 
     // ANDROID
-    let aTag = document.createElement("a");
+
     const isIOS = aTag.relList.supports("ar") ? true : false
 
     const androidData = {
@@ -697,6 +696,52 @@ const addAR = () => {
 
 }
 
+const startNativeAR = async () => {
+
+    if (/android/i.test(navigator.userAgent)) {
+
+        const androidData = {
+            url: '',
+            assetName: 'model',
+            mode: '3d_preferred',
+            link: 'vis_prime',
+            title: () => { return currentModelName },
+            vertical: false,
+        }
+
+        for (const val of Object.values(loadedModels)) {
+            console.log(val)
+            if (val.active) {
+                androidData.assetName = val.name
+                androidData.url = assetManager.getGithubUrl(androidData.assetName)
+            }
+        }
+        if (!androidData.assetName) {
+            alert('No Active Model')
+            return
+        }
+
+        aTag.href = `intent://arvr.google.com/scene-viewer/1.1?file=${androidData.url}&mode=${androidData.mode}&link=${androidData.link}&title=${androidData.title()}&enable_vertical_placement=${androidData.vertical}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://www.google.com/ar;end;`
+
+        window.open(aTag)
+
+    }
+    else if (aTag.relList.supports("ar")) {
+        if (!usdzExporter) {
+            usdzExporter = new USDZExporter();
+        }
+
+        const arraybuffer = await usdzExporter.parse(sceneGroup);
+        const blob = new Blob([arraybuffer], { type: 'application/octet-stream' });
+        aTag.rel = "ar"
+        aTag.href = URL.createObjectURL(blob);
+        aTag.download = "robot.usdz";
+        aTag.click()
+    } else {
+        alert('Sorry,AR Not available')
+    }
+
+}
 
 
 const addLights = () => {
