@@ -578,7 +578,7 @@ const loadModel = async (assetName) => {
     box3.getCenter(controls.target)
     box3.getSize(camera.position)
 
-    controls.maxDistance = camera.position.length() * 1.5
+    controls.maxDistance = camera.position.length() * 2.5
     // camera.position.set(0,0,0)
     controls.update()
     camNoise.start()
