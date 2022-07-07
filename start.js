@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import Stats from 'three-addons/libs/stats.module.js';
 import { OrbitControls } from 'three-addons/controls/OrbitControls.js';
 import { Reflector } from 'three-addons/objects/Reflector.js';
 import { assetManager, cameraNoise, NoiseGenerator } from './custom/AssetManager.js';
@@ -30,7 +31,7 @@ fpsDiv.style.left = "1%"
 // fpsDiv.style.width = "50px"
 // fpsDiv.style.height = "50px"
 fpsDiv.style.backgroundColor = "#000000"
-document.body.appendChild(fpsDiv)
+// document.body.appendChild(fpsDiv)
 
 const box3 = new THREE.Box3()
 let gui = guiManager.gui
@@ -44,7 +45,7 @@ const assetList = assetManager.getAssetList()
 let currentTime = 0, PreviousTime = 0, frameCounter = 0
 let currentModelName = ""
 
-let scene, camera, controls, gyroControls, gyroTextDiv, gyroTarget, renderer, currentMixer, updateArray = [], delta, skeleton
+let scene, camera, stats, controls, gyroControls, gyroTextDiv, gyroTarget, renderer, currentMixer, updateArray = [], delta, skeleton
 
 const clock = new THREE.Clock()
 const container = document.getElementById('content3d')
@@ -263,7 +264,8 @@ const init = () => {
     // }
     modelScene()
 
-
+    stats = new Stats()
+    document.body.appendChild(stats.domElement)
 
 }
 
@@ -798,7 +800,7 @@ const render = () => {
     updateSize()
 
     delta = clock.getDelta()
-
+    stats.update()
 
     if (currentMixer) {
 
