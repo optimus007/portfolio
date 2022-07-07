@@ -3,7 +3,7 @@ import { GUI } from "three-addons/libs/lil-gui.module.min.js"
 
 class GuiManager {
     constructor() {
-        this.gui = new GUI({ title: 'v6.02 dev' })
+        this.gui = new GUI({ title: 'v6.1 dev' })
         this.gui.close()
 
         this.xrFolder = this.gui.addFolder(" X R ")
